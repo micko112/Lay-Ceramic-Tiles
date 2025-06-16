@@ -1,0 +1,196 @@
+@Composable
+fun ScreenCalculate() {
+    var values by remember { mutableStateOf(List(5) { "" }) }
+    //val calculation
+    Column(modifier = Modifier.fillMaxSize()) {
+        Spacer(modifier = Modifier.height(120.dp))
+        InputCrossLayout(
+            values = values,
+            onValueChange = { index, newValue ->
+                values = values.toMutableList().also { it[index] = newValue }
+            }
+        )
+        //CustomButton("CALCULATE", onClick = calculation)
+        Column {
+            Row {
+                Text("Results: Area(m2)")
+            }
+            Row {
+                Text("Floor = ")
+            }
+            Row {
+                Text("Wall = ")
+            }
+            Row {
+                Text("Tiles needed = ")
+            }
+            Row {
+                Text("Floor tiles = ")
+            }
+            Row {
+                Text("Wall tiles = ")
+            }
+
+        }
+    }
+
+}
+@Preview
+@Composable
+private fun ScreenCalc() {
+    ScreenCalculate()
+}
+@Composable
+fun InputCrossLayout(
+    modifier: Modifier = Modifier,
+    values: List<String>,
+    onValueChange: (Int, String) -> Unit
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Top field (a)
+        InputField(
+            value = values[0],
+            prefix = "a=",
+            unit = "m",
+            onValueChange = { newValue -> onValueChange(0, newValue) },
+            modifier = Modifier.padding(8.dp)
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left field (b)
+            InputField(
+                value = values[1],
+                prefix = "b=",
+                unit = "m",
+                onValueChange = { newValue -> onValueChange(1, newValue) },
+                modifier = Modifier.padding(8.dp)
+            )
+
+            // Middle - space for image
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(4.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.wc),
+                    contentDescription = "Ceramic logo",
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Right field (c)
+            InputField(
+                value = values[2],
+                prefix = "c=",
+                unit = "m",
+                onValueChange = { newValue -> onValueChange(2, newValue) },
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+
+        // Bottom field (d)
+        InputField(
+            value = values[3],
+            prefix = "d=",
+            unit = "m",
+            onValueChange = { newValue -> onValueChange(3, newValue) },
+            modifier = Modifier.padding(8.dp)
+        )
+        Row(modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.width(18.dp))
+            Text("Height: ")
+            InputField(
+                value = values[4],
+                prefix = "h=",
+                unit = "m",
+                onValueChange = { newValue -> onValueChange(4, newValue) },
+                modifier = Modifier.padding(8.dp)
+            )
+
+        }
+    }
+}
+@Composable
+fun InputCrossLayout(
+    modifier: Modifier = Modifier,
+    values: List<String>,
+    onValueChange: (Int, String) -> Unit
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Top field (a)
+        InputField(
+            value = values[0],
+            prefix = "a=",
+            unit = "m²",
+            onValueChange = { newValue -> onValueChange(0, newValue) },
+            modifier = Modifier.padding(8.dp)
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left field (b)
+            InputField(
+                value = values[1],
+                prefix = "b=",
+                unit = "m²",
+                onValueChange = { newValue -> onValueChange(1, newValue) },
+                modifier = Modifier.padding(8.dp)
+            )
+
+            // Middle - space for image
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(4.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.wc),
+                    contentDescription = "Ceramic logo",
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Right field (c)
+//            InputField(
+//                value = values[2],
+//                prefix = "c=",
+//                unit = "m",
+//                onValueChange = { newValue -> onValueChange(2, newValue) },
+//                modifier = Modifier.padding(8.dp)
+//            )
+        }
+
+        // Bottom field (d)
+//        InputField(
+//            value = values[3],
+//            prefix = "d=",
+//            unit = "m",
+//            onValueChange = { newValue -> onValueChange(3, newValue) },
+//            modifier = Modifier.padding(8.dp)
+//        )
+        Row(modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.width(18.dp))
+            Text("Height: ")
+            InputField(
+                value = values[2],
+                prefix = "h=",
+                unit = "m²",
+                onValueChange = { newValue -> onValueChange(2, newValue) },
+                modifier = Modifier.padding(8.dp)
+            )
+
+        }
+    }
+}

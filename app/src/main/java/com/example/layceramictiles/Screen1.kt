@@ -1,6 +1,7 @@
 package com.example.layceramictiles
 
 import android.R.attr.fontWeight
+import android.R.attr.onClick
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.layceramictiles.components.CustomButton
 
 @Composable
 fun Screen1(onContinueClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -46,7 +48,7 @@ fun Screen1(onContinueClick: () -> Unit, modifier: Modifier = Modifier) {
         )
         // Logo
         Image(
-            painter = painterResource(id = R.drawable.ceramiclogo_removebg),
+            painter = painterResource(id = R.drawable.ceramiclogo_removebg_preview),
             contentDescription = "Ceramic logo",
             modifier = Modifier
                 .height(400.dp)
@@ -56,17 +58,6 @@ fun Screen1(onContinueClick: () -> Unit, modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(50.dp))
 
         // Dugme - veće i bliže sredini
-        Button(
-            onClick = onContinueClick,
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(64.dp)
-        ) {
-            Text(
-                text = "CALCULATE",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        CustomButton("CALCULATE", onClick = onContinueClick)
     }
 }

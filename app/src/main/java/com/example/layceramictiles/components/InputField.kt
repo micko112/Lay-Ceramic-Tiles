@@ -40,7 +40,7 @@ fun InputField(
     BasicTextField(
         value = value,
         onValueChange = { newValue ->
-            if (newValue.all { it.isDigit() }) {
+            if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*\$"))) {
                 onValueChange(newValue)
             }
         },
