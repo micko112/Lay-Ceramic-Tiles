@@ -194,3 +194,75 @@ fun InputCrossLayout(
         }
     }
 }
+@Composable
+fun TileCard(
+    title: String,
+    imageRes: Int,
+    valueWidth: String,
+    valueHeight: String,
+    onWidthChange: (String) -> Unit,
+    onHeightChange: (String) -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = "Tile image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Width (cm)", fontSize = 14.sp)
+                    TextField(
+                        value = valueWidth,
+                        onValueChange = onWidthChange,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                        colors = TextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.LightGray,
+                            focusedContainerColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Height (cm)", fontSize = 14.sp)
+                    TextField(
+                        value = valueHeight,
+                        onValueChange = onHeightChange,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                        colors = TextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.LightGray,
+                            focusedContainerColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+    }
+}

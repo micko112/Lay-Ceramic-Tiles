@@ -38,7 +38,7 @@ fun CustomButton(
         Text(
             text = text,
             fontSize = fontSize.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
     }
 }

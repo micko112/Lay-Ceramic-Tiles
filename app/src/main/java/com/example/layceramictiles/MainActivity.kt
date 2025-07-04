@@ -9,6 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.layceramictiles.components.SharedDataHolder
 import com.example.layceramictiles.ui.theme.LayCeramicTilesTheme
 
 class MainActivity : ComponentActivity() {
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
 }
 @Composable
 fun myAppNavigation(){
+
     val navController = rememberNavController()
     NavHost(navController=navController,
         startDestination = "Screen1"){
@@ -47,7 +49,8 @@ fun myAppNavigation(){
             )
         }
         composable("ScreenMaterials") {
-            ScreenMaterials()
+            ScreenMaterials( wallTileArea = SharedDataHolder.wallTilesArea,
+                floorTileArea = SharedDataHolder.floorTilesArea)
         }
     }
 
@@ -67,10 +70,3 @@ fun myAppNavigation(){
 private fun view() {
     ScreenCalculate()
 }
-
-
-
-
-
-
-

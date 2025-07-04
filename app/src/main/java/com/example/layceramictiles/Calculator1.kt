@@ -30,13 +30,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.layceramictiles.components.CustomButton
 import com.example.layceramictiles.components.InputField
-import com.example.layceramictiles.components.NextPreviousButtons
+import com.example.layceramictiles.components.NextPreviousSaveButtons
+import com.example.layceramictiles.components.SharedDataHolder
 
 @Composable
 fun ScreenCalculate(onNextClick: () -> Unit = {}) {
     var values by remember { mutableStateOf(List(3) { "" }) }
     var results by remember { mutableStateOf<List<String?>>(List(6) { null }) }
-
+    val resultsReady = results.all { !it.isNullOrBlank() }
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(80.dp))
         InputCrossLayout(
@@ -54,6 +55,12 @@ fun ScreenCalculate(onNextClick: () -> Unit = {}) {
                 text = "CALCULATE",
                 onClick = {
                     results = calculateResults(values)
+                    // ✨ Ovde setuješ globalne vrednosti
+                    val floorTilesArea = results[4]?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
+                    val wallTilesArea = results[5]?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
+
+                    SharedDataHolder.floorTilesArea = floorTilesArea
+                    SharedDataHolder.wallTilesArea = wallTilesArea
                 }
             )
         }
@@ -65,7 +72,7 @@ fun ScreenCalculate(onNextClick: () -> Unit = {}) {
             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center )
         Surface(modifier = Modifier
             .fillMaxWidth()
-            .padding(6.dp),
+            .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             color=MaterialTheme.colorScheme.secondary,
             tonalElevation = 8.dp,
@@ -122,7 +129,9 @@ fun ScreenCalculate(onNextClick: () -> Unit = {}) {
         }
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End){
-            NextPreviousButtons(onNextClick=onNextClick)
+            NextPreviousSaveButtons(onNextClick=onNextClick,
+                //isNextEnabled = resultsReady
+            )
 
         }
     }
@@ -220,7 +229,7 @@ fun ResultColumn(label: String, value: String?) {
     Column (modifier = Modifier.padding(horizontal = 8.dp)) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.width(120.dp)
         )
         Text(
