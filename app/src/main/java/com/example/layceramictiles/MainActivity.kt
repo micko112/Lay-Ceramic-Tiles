@@ -6,9 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.layceramictiles.View.ScreenCalculateViewModel
+import com.example.layceramictiles.View.ScreenMaterialsViewModel
 import com.example.layceramictiles.components.SharedDataHolder
 import com.example.layceramictiles.ui.theme.LayCeramicTilesTheme
 
@@ -32,7 +35,8 @@ class MainActivity : ComponentActivity() {
 }
 @Composable
 fun myAppNavigation(){
-
+    val viewModelMat: ScreenMaterialsViewModel = viewModel()
+    val viewModelCal: ScreenCalculateViewModel = viewModel()
     val navController = rememberNavController()
     NavHost(navController=navController,
         startDestination = "Screen1"){
@@ -43,14 +47,22 @@ fun myAppNavigation(){
         }
         composable("ScreenCalculate") {
             ScreenCalculate(
+                viewModel = viewModelCal,
                 onNextClick = {
                     navController.navigate("ScreenMaterials")
-                }
+                },
+
             )
         }
         composable("ScreenMaterials") {
+            
             ScreenMaterials( wallTileArea = SharedDataHolder.wallTilesArea,
-                floorTileArea = SharedDataHolder.floorTilesArea)
+                floorTileArea = SharedDataHolder.floorTilesArea,
+                viewModel = viewModelMat,
+                onPreviousClick = {
+                    navController.navigate("ScreenCalculate")
+                }
+            )
         }
     }
 

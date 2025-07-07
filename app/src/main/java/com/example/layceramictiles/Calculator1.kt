@@ -17,10 +17,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -28,23 +26,38 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.layceramictiles.View.ScreenCalculateViewModel
+import com.example.layceramictiles.components.AreaCard
 import com.example.layceramictiles.components.CustomButton
 import com.example.layceramictiles.components.InputField
 import com.example.layceramictiles.components.NextPreviousSaveButtons
 import com.example.layceramictiles.components.SharedDataHolder
 
 @Composable
-fun ScreenCalculate(onNextClick: () -> Unit = {}) {
-    var values by remember { mutableStateOf(List(3) { "" }) }
-    var results by remember { mutableStateOf<List<String?>>(List(6) { null }) }
+fun ScreenCalculate(viewModel: ScreenCalculateViewModel = viewModel(),
+                    onNextClick: () -> Unit = {}
+) {
+    //var values by remember { mutableStateOf(List(3) { "" }) }
+   // var results by remember { mutableStateOf<List<String?>>(List(6) { null }) }
+    val widthA by viewModel.widthA.collectAsState()
+    val lengthB by viewModel.lengthB.collectAsState()
+    val heightH by viewModel.heightH.collectAsState()
+    val results by viewModel.results.collectAsState()
     val resultsReady = results.all { !it.isNullOrBlank() }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(80.dp))
-        InputCrossLayout(
-            values = values,
-            onValueChange = { index, newValue ->
-                values = values.toMutableList().also { it[index] = newValue }
-            }
+        AreaCard(
+            title = "AREA",
+            imageRes = R.drawable.wc,
+            valueWidth = widthA,
+            valueLength = lengthB,
+            valueHeight = heightH,
+            onWidthChange = { viewModel.widthA.value = it},
+            onLengthChange = { viewModel.lengthB.value = it},
+            onHeightChange = { viewModel.heightH.value = it},
+            modifier= Modifier
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -54,7 +67,11 @@ fun ScreenCalculate(onNextClick: () -> Unit = {}) {
             CustomButton(
                 text = "CALCULATE",
                 onClick = {
-                    results = calculateResults(values)
+                    viewModel.results.value = calculateResults(
+                        widthA = widthA.toFloatOrNull() ?: 0f,
+                        lengthB = lengthB.toFloatOrNull() ?: 0f,
+                        heightH = heightH.toFloatOrNull() ?: 0f,
+                    )
                     // ✨ Ovde setuješ globalne vrednosti
                     val floorTilesArea = results[4]?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
                     val wallTilesArea = results[5]?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
@@ -68,8 +85,6 @@ fun ScreenCalculate(onNextClick: () -> Unit = {}) {
         Spacer(modifier = Modifier.height(32.dp))
 
          //Results display
-        Text("Results:", style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center )
         Surface(modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
@@ -239,19 +254,22 @@ fun ResultColumn(label: String, value: String?) {
     }
 }
 
-fun calculateResults(values: List<String>): List<String> {
+fun calculateResults(
+    widthA: Float,
+    lengthB: Float,
+    heightH: Float,
+): List<String> {
     return try {
         // Pretvaranje unosa u brojeve
-        val a = values[0].toFloatOrNull() ?: 0f
-        val b = values[1].toFloatOrNull() ?: 0f
+//        val a = values[0].toFloatOrNull() ?: 0f
+//        val b = values[1].toFloatOrNull() ?: 0f
 //        val c = values[2].toFloatOrNull() ?: 0f
-//        val d = values[3].toFloatOrNull() ?: 0f
-        val h = values[2].toFloatOrNull() ?: 0f
+//        val d = values[3].toFloatOrNull() ?: 0f //       val h = values[2].toFloatOrNull() ?: 0f
         //val tileSize = values[4].toFloatOrNull() ?: 0f
 
         // Izračunavanje rezultata
-        val floorArea = a * b
-        val wallArea = 2 * (a + b) * h
+        val floorArea = widthA * lengthB
+        val wallArea = 2 * (widthA + lengthB) * heightH
         val floorTiles = floorArea*1.1
         val wallTiles = wallArea *1.08
         val totalTiles = floorTiles+wallTiles

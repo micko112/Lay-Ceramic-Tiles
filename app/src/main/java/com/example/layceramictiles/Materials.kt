@@ -14,14 +14,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.layceramictiles.View.ScreenMaterialsViewModel
 import com.example.layceramictiles.components.CustomButton
 import com.example.layceramictiles.components.NextPreviousSaveButtons
 import com.example.layceramictiles.components.TileCard
@@ -30,19 +30,27 @@ import com.example.layceramictiles.components.TileCard
 fun ScreenMaterials(
     wallTileArea: Float,
     floorTileArea: Float,
+    viewModel: ScreenMaterialsViewModel = viewModel(),
     onPreviousClick: () -> Unit = {},
     onNextClick: () -> Unit = {},
     onSaveClick: () -> Unit = {}
 ) {
-    var TilewallWidth by remember { mutableStateOf("") }
-    var TilewallLength by remember { mutableStateOf("") }
-    var TilefloorWidth by remember { mutableStateOf("") }
-    var TilefloorLength by remember { mutableStateOf("") }
-    var WallGroutWidth by remember { mutableStateOf("") }
-    var FloorGroutWidth by remember { mutableStateOf("") }
+//    var TilewallWidth by remember { mutableStateOf("") }
+//    var TilewallLength by remember { mutableStateOf("") }
+//    var TilefloorWidth by remember { mutableStateOf("") }
+//    var TilefloorLength by remember { mutableStateOf("") }
+//    var WallGroutWidth by remember { mutableStateOf("") }
+//    var FloorGroutWidth by remember { mutableStateOf("") }
+    val tileWallWidth by viewModel.tileWallWidth.collectAsState()
+    val tileWallLength by viewModel.tileWallLength.collectAsState()
+    val tileFloorWidth by viewModel.tileFloorWidth.collectAsState()
+    val tileFloorLength by viewModel.tileFloorLength.collectAsState()
+    val wallGroutWidth by viewModel.wallGroutWidth.collectAsState()
+    val floorGroutWidth by viewModel.floorGroutWidth.collectAsState()
+    val results by viewModel.results.collectAsState()
 
     // 🔢 Izračunaj materijale
-    var results by remember { mutableStateOf<List<String?>>(List(2) { null }) }
+    //var results by remember { mutableStateOf<List<String?>>(List(2) { null }) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(40.dp))
@@ -50,24 +58,25 @@ fun ScreenMaterials(
         TileCard(
             title = "WALL TILE",
             imageRes = R.drawable.tile,
-            valueWidth = TilewallWidth,
-            valueHeight = TilewallLength,
-            valueGrout = WallGroutWidth,
-            onWidthChange = { TilewallWidth = it },
-            onHeightChange = { TilewallLength = it },
-            onGroutChange = { WallGroutWidth = it },
+            valueWidth = tileWallWidth,
+            valueHeight = tileWallLength,
+            valueGrout = wallGroutWidth,
+            onWidthChange = { viewModel.tileWallWidth.value = it },
+            onHeightChange = { viewModel.tileWallLength.value = it },
+            onGroutChange = { viewModel.wallGroutWidth.value = it }
+            ,
         )
         Spacer(modifier = Modifier.height(8.dp))
 
         TileCard(
             title = "FLOOR TILE",
             imageRes = R.drawable.tile,
-            valueWidth = TilefloorWidth,
-            valueHeight = TilefloorLength,
-            valueGrout = FloorGroutWidth,
-            onWidthChange = { TilefloorWidth = it },
-            onHeightChange = { TilefloorLength = it },
-            onGroutChange = { FloorGroutWidth = it}
+            valueWidth = tileFloorWidth,
+            valueHeight = tileFloorLength,
+            valueGrout = floorGroutWidth,
+            onWidthChange = { viewModel.tileFloorWidth.value = it },
+            onHeightChange = { viewModel.tileFloorLength.value = it },
+            onGroutChange = { viewModel.floorGroutWidth.value = it }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -77,15 +86,15 @@ fun ScreenMaterials(
             CustomButton(
                 text = "CALCULATE",
                 onClick = {
-                     results = calculateAdhesiveAndGrout(
+                     viewModel.results.value = calculateAdhesiveAndGrout(
                         floorTileArea = floorTileArea,
                         wallTileArea = wallTileArea,
-                        floorTileWidthCm = TilefloorWidth.toFloatOrNull() ?: 0f,
-                        floorTileHeightCm = TilefloorLength.toFloatOrNull() ?: 0f,
-                        wallTileWidthCm = TilewallWidth.toFloatOrNull() ?: 0f,
-                        wallTileHeightCm = TilewallLength.toFloatOrNull() ?: 0f,
-                        floorGroutWidthMm = FloorGroutWidth.toFloatOrNull() ?: 0f,
-                        wallGroutWidthMm = WallGroutWidth.toFloatOrNull() ?: 0f,
+                        floorTileWidthCm = tileFloorWidth.toFloatOrNull() ?: 0f,
+                        floorTileLengthCm = tileFloorLength.toFloatOrNull() ?: 0f,
+                        wallTileWidthCm = tileWallWidth.toFloatOrNull() ?: 0f,
+                        wallTileLengthCm = tileWallLength.toFloatOrNull() ?: 0f,
+                        floorGroutWidthMm = floorGroutWidth.toFloatOrNull() ?: 0f,
+                        wallGroutWidthMm = wallGroutWidth.toFloatOrNull() ?: 0f,
                     )
                     // ništa konkretno sada jer si već izračunao iznad
                 }
@@ -147,19 +156,18 @@ fun calculateAdhesiveAndGrout(
     floorTileArea: Float,
     wallTileArea: Float,
     floorTileWidthCm: Float,
-    floorTileHeightCm: Float,
+    floorTileLengthCm: Float,
     wallTileWidthCm: Float,
-    wallTileHeightCm: Float,
+    wallTileLengthCm: Float,
     floorGroutWidthMm: Float,
     wallGroutWidthMm: Float
 ): List<String> {
-    val floorTilesCount = (floorTileArea * 10000) / (floorTileWidthCm * floorTileHeightCm)
-    val wallTilesCount = (wallTileArea * 10000) / (wallTileWidthCm * wallTileHeightCm)
+    val adhesiveKg = (floorTileArea * 6.0 + wallTileArea * 5).toFloat()
+    val wallTileGirth = 0.8f
+    val floorTileGirth = 1f
 
-    val adhesiveKg = (floorTileArea * 4.0 + wallTileArea * 3.5).toFloat()
-
-    val floorGrout = (floorGroutWidthMm / 1000) * floorTilesCount * 0.05f
-    val wallGrout = (wallGroutWidthMm / 1000) * wallTilesCount * 0.05f
+    val floorGrout = floorTileArea * ((floorTileLengthCm + floorTileWidthCm) * floorGroutWidthMm/10 * floorTileGirth * 1.6f)/(floorTileLengthCm * floorTileWidthCm)
+    val wallGrout = wallTileArea * ((wallTileLengthCm + wallTileWidthCm) * wallGroutWidthMm/10 * wallTileGirth * 1.6f)/(wallTileLengthCm * wallTileWidthCm)
     val totalGrout = floorGrout + wallGrout
 
     return listOf(
