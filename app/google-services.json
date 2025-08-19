@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "540671164762",
+    "project_id": "layceramictiles",
+    "storage_bucket": "layceramictiles.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:540671164762:android:b603e286df9f556df4f363",
+        "android_client_info": {
+          "package_name": "com.example.layceramictiles"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAPnhdT1hq0UT73ExdHUHtZ4z6CHvtNMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -45,7 +45,9 @@ fun ScreenCalculate(viewModel: ScreenCalculateViewModel = viewModel(),
     val heightH by viewModel.heightH.collectAsState()
     val results by viewModel.results.collectAsState()
     val resultsReady = results.all { !it.isNullOrBlank() }
-
+//    LaunchedEffect(Unit) {
+//        testFirebaseWrite()
+//    }
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(80.dp))
         AreaCard(
@@ -67,17 +69,25 @@ fun ScreenCalculate(viewModel: ScreenCalculateViewModel = viewModel(),
             CustomButton(
                 text = "CALCULATE",
                 onClick = {
-                    viewModel.results.value = calculateResults(
-                        widthA = widthA.toFloatOrNull() ?: 0f,
-                        lengthB = lengthB.toFloatOrNull() ?: 0f,
-                        heightH = heightH.toFloatOrNull() ?: 0f,
-                    )
-                    // ✨ Ovde setuješ globalne vrednosti
-                    val floorTilesArea = results[4]?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
-                    val wallTilesArea = results[5]?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
+                    val widthA = viewModel.widthA.value.toFloatOrNull() ?: 0f;
+                    val lengthB = viewModel.lengthB.value.toFloatOrNull() ?: 0f;
+                    val heightH = viewModel.heightH.value.toFloatOrNull() ?: 0f;
 
-                    SharedDataHolder.floorTilesArea = floorTilesArea
-                    SharedDataHolder.wallTilesArea = wallTilesArea
+                    val resultsCalc = calculateResults(
+                        widthA = widthA,
+                        lengthB = lengthB,
+                        heightH = heightH,
+                    )
+                    viewModel.results.value = resultsCalc;
+                    // ✨ Ovde setuješ globalne vrednosti
+                    SharedDataHolder.floorTilesArea = viewModel.results.value.getOrNull(4)
+                        ?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
+
+                    SharedDataHolder.wallTilesArea = viewModel.results.value.getOrNull(5)
+                        ?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
+                    SharedDataHolder.widthA = widthA
+                    SharedDataHolder.lengthB = lengthB
+                    SharedDataHolder.heightH = heightH
                 }
             )
         }
@@ -150,6 +160,7 @@ fun ScreenCalculate(viewModel: ScreenCalculateViewModel = viewModel(),
 
         }
     }
+
 }
 
 @Preview
@@ -288,4 +299,5 @@ fun calculateResults(
         // U slučaju greške vraćamo prazne rezultate
         List(6) { "Error" }
     }
+
 }

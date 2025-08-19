@@ -14,10 +14,28 @@ import com.example.layceramictiles.View.ScreenCalculateViewModel
 import com.example.layceramictiles.View.ScreenMaterialsViewModel
 import com.example.layceramictiles.components.SharedDataHolder
 import com.example.layceramictiles.ui.theme.LayCeramicTilesTheme
+import saveProjectToFirestore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Referenca na Firestore
+//        val db = Firebase.firestore
+//
+//        // Primer upisa u Firestore
+//        val testData = hashMapOf(
+//            "ime" to "Proba",
+//            "vreme" to System.currentTimeMillis()
+//        )
+//
+//        db.collection("testKolekcija")
+//            .add(testData)
+//            .addOnSuccessListener { documentReference ->
+//                println("Uspešno dodato: ${documentReference.id}")
+//            }
+//            .addOnFailureListener { e ->
+//                println("Greška pri dodavanju: $e")
+//            }
         enableEdgeToEdge()
         setContent {
             LayCeramicTilesTheme {
@@ -33,10 +51,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+
 @Composable
 fun myAppNavigation(){
     val viewModelMat: ScreenMaterialsViewModel = viewModel()
-    val viewModelCal: ScreenCalculateViewModel = viewModel()
+    val viewModelCalc: ScreenCalculateViewModel = viewModel()
     val navController = rememberNavController()
     NavHost(navController=navController,
         startDestination = "Screen1"){
@@ -47,7 +67,7 @@ fun myAppNavigation(){
         }
         composable("ScreenCalculate") {
             ScreenCalculate(
-                viewModel = viewModelCal,
+                viewModel = viewModelCalc,
                 onNextClick = {
                     navController.navigate("ScreenMaterials")
                 },
@@ -55,13 +75,25 @@ fun myAppNavigation(){
             )
         }
         composable("ScreenMaterials") {
-            
-            ScreenMaterials( wallTileArea = SharedDataHolder.wallTilesArea,
+
+            ScreenMaterials(
+                wallTileArea = SharedDataHolder.wallTilesArea,
                 floorTileArea = SharedDataHolder.floorTilesArea,
                 viewModel = viewModelMat,
+                viewModelCalc = viewModelCalc,
                 onPreviousClick = {
                     navController.navigate("ScreenCalculate")
+                },
+                onSaveClick = { fileName ->
+                    saveProjectToFirestore(
+                        fileName = fileName,
+                        viewModelCalc = viewModelCalc,
+                        viewModelMat = viewModelMat,
+                        wallTileArea = SharedDataHolder.wallTilesArea,
+                        floorTileArea = SharedDataHolder.floorTilesArea
+                    )
                 }
+
             )
         }
     }
