@@ -1,9 +1,12 @@
+
 import android.util.Log
 import com.example.layceramictiles.View.ScreenCalculateViewModel
 import com.example.layceramictiles.View.ScreenMaterialsViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
+
 
 fun saveProjectToFirestore(
     fileName: String,
@@ -42,7 +45,7 @@ fun saveProjectToFirestore(
 
     db.collection("Full Baza")
         .document(fileName)
-        .set(data)
+        .set(data, SetOptions.merge())
         .addOnSuccessListener {
             Log.d("Firestore", "Uspešno sačuvano pod imenom $fileName")
         }

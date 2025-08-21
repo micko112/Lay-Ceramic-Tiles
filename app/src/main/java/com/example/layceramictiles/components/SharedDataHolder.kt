@@ -7,5 +7,5 @@ object SharedDataHolder {
     var widthA: Float = 0f
     var lengthB: Float = 0f
     var heightH: Float = 0f
-
+    var currentFileName: String? = null
 }

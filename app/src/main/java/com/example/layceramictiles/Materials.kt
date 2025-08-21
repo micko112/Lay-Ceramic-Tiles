@@ -35,8 +35,7 @@ import com.example.layceramictiles.components.TileCard
 
 @Composable
 fun ScreenMaterials(
-    wallTileArea: Float,
-    floorTileArea: Float,
+
     viewModel: ScreenMaterialsViewModel = viewModel(),
     viewModelCalc: ScreenCalculateViewModel,
     onPreviousClick: () -> Unit = {},

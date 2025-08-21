@@ -55,15 +55,20 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun myAppNavigation(){
+
     val viewModelMat: ScreenMaterialsViewModel = viewModel()
     val viewModelCalc: ScreenCalculateViewModel = viewModel()
     val navController = rememberNavController()
+
     NavHost(navController=navController,
         startDestination = "Screen1"){
         composable ("Screen1"){
-            Screen1(onContinueClick = {
-                navController.navigate("ScreenCalculate")
-            })
+            Screen1(
+                onContinueClick = { navController.navigate("ScreenCalculate") },
+                viewModelCalc = viewModelCalc,
+                viewModelMat  = viewModelMat,
+                onOpenSaved = { /* file opened */ navController.navigate("ScreenCalculate") }
+            )
         }
         composable("ScreenCalculate") {
             ScreenCalculate(
@@ -77,16 +82,18 @@ fun myAppNavigation(){
         composable("ScreenMaterials") {
 
             ScreenMaterials(
-                wallTileArea = SharedDataHolder.wallTilesArea,
-                floorTileArea = SharedDataHolder.floorTilesArea,
+//                wallTileArea = SharedDataHolder.wallTilesArea,
+//                floorTileArea = SharedDataHolder.floorTilesArea,
                 viewModel = viewModelMat,
                 viewModelCalc = viewModelCalc,
                 onPreviousClick = {
                     navController.navigate("ScreenCalculate")
                 },
-                onSaveClick = { fileName ->
+                onSaveClick = { fileNameFromDialog ->
+                    val name = SharedDataHolder.currentFileName ?: fileNameFromDialog
+                    SharedDataHolder.currentFileName = name
                     saveProjectToFirestore(
-                        fileName = fileName,
+                        fileName = name,
                         viewModelCalc = viewModelCalc,
                         viewModelMat = viewModelMat,
                         wallTileArea = SharedDataHolder.wallTilesArea,
