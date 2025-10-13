@@ -1,0 +1,534 @@
+// prvo transfer receiver-sender-request-response za Request Operation, Object arg Response Object result, Exception,
+// CController - Konekcija - DBBroker - Server - ClientHandler - TableModel
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Receiver implements Serializable{
+    Socket socket;
+
+    public Receiver() {
+    }
+
+    public Receiver(Socket socket) {
+        this.socket = socket;
+    }
+    public Object receive(){
+        try {
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            return in.readObject();
+        } catch (IOException ex) {
+            Logger.getLogger(Receiver.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Receiver.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+}
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Sender implements Serializable{
+    Socket socket;
+
+    public Sender() {
+    }
+
+    public Sender(Socket socket) {
+        this.socket = socket;
+    }
+    public void send(Object o){
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            out.writeObject(o);
+            out.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+}
+// CCONTROLLER  --------------------------------------------------------------------------------------------------------------------
+import enums.Operation;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import transfer.Receiver;
+import transfer.Request;
+import transfer.Response;
+import transfer.Sender;
+
+public class CController {
+    Socket socket;
+    Sender sender;
+    Receiver receiver;
+
+    private static CController instance;
+    public static CController getInstance(){
+        if(instance == null){
+            instance = new CController();
+        }
+        return instance;
+    }
+    public CController() {
+        try {
+            this.socket = new Socket("localhost", 9000);
+            this.sender = new Sender(socket);
+            this.receiver = new Receiver(socket);
+        } catch (IOException ex) {
+            Logger.getLogger(CController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public List<Klijent> vratiKlijente() {
+        Request req = new Request(Operation.vratiKlijente, null);
+        sender.send(req);
+        System.out.println("CC je poslao zahtev");
+        Response res = (Response) receiver.receive();
+        List<Klijent> k = (List<Klijent>) res.getResult();
+        System.out.println("CCcontroller klijenti:    "+k);
+        return k;
+    }
+
+    public Racun pronadjiRacun(int racunId) {
+        Request req = new Request(Operation.pronadjiRacun, racunId);
+        sender.send(req);
+        System.out.println("CC je poslao zahtev");
+        Response res = (Response) receiver.receive();
+        Racun racun = (Racun) res.getResult();
+        
+        return racun;
+    }
+
+    public List<Proizvod> vratiProizvode() {
+        Request req = new Request(Operation.vratiProizvode, null);
+        sender.send(req);
+        System.out.println("CC je poslao zahtev za proizvode");
+        Response res = (Response) receiver.receive();
+        List<Proizvod> p= (List<Proizvod>) res.getResult();
+        System.out.println("CCcontroller klijenti:    "+p);
+        return p;
+    }
+
+    public void sacuvajRacun(Racun racun) {
+        Request req = new Request(Operation.sacuvajRacun, racun);
+        sender.send(req);
+        System.out.println("CC je poslao zahtev za sacuvaj racun");
+        Response res = (Response) receiver.receive();
+    }
+}
+// KONEKCIJA  --------------------------------------------------------------------------------------------------------------------
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Konekcija {
+    private static Konekcija instance;
+    public static Konekcija getInstance(){
+        if(instance == null){
+            instance = new Konekcija();
+        }
+        return instance;
+    }
+    Connection connection;
+    public Konekcija() {
+        try {
+            String url = "jdbc:mysql://localhost:3306/racun";
+            this.connection = DriverManager.getConnection(url, "root", "");
+            connection.setAutoCommit(false);
+        } catch (SQLException ex) {
+            Logger.getLogger(Konekcija.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+    public void commit() throws SQLException{
+        connection.commit();
+    }
+}
+// DBRROKER  --------------------------------------------------------------------------------------------------------------------
+import domain.Klijent;
+import domain.Proizvod;
+import domain.Racun;
+import domain.StavkaRacuna;
+import java.sql.Date;
+import java.util.List;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class DBBroker {
+    private static DBBroker instance;
+    public static DBBroker getInstance(){
+        if(instance == null){
+            instance = new DBBroker();
+        }
+        return instance;
+    }
+    Konekcija conn = Konekcija.getInstance();
+
+    public List<Klijent> vratiKlijente() {
+        try {
+            String upit  = "select * from klijent";
+            PreparedStatement ps = conn.getConnection().prepareStatement(upit);
+            ResultSet rs = ps.executeQuery();
+            List<Klijent> klijenti = new LinkedList<>();
+            while(rs.next()){
+                Klijent k = new Klijent(rs.getInt(1), rs.getString(2), rs.getString(3));
+                klijenti.add(k);
+                        
+            }
+            System.out.println(klijenti);
+            return klijenti;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public Racun pronadjiRacun(int id) {
+        try {
+            String upit1 = "select * from racun r join klijent k on r.klijentId = k.klijentId where r.racunId = ?";
+            PreparedStatement ps1 = conn.getConnection().prepareStatement(upit1);
+            ps1.setInt(1, id);
+            ResultSet rs = ps1.executeQuery();
+            if(!rs.next()){
+                System.out.println("REsult set je prazan");
+                return null;
+            }
+            Klijent k = new Klijent(rs.getInt("k.klijentId"), rs.getString("k.naziv"), rs.getString("k.adresa"));
+            Racun r = new Racun(id, rs.getDate("r.datum"), k, rs.getDouble("r.ukupanIznos"));
+            
+            String upit2 = "select * from stavkaRacuna sr join proizvod p on sr.proizvodId = p.proizvodId where sr.racunId = ?";
+            PreparedStatement ps2 = conn.getConnection().prepareStatement(upit2);
+            ps2.setInt(1, id);
+            ResultSet rs2 = ps2.executeQuery();
+            List<StavkaRacuna> stavke = new LinkedList<>();
+            while(rs2.next()){
+               Proizvod p = new Proizvod(rs2.getInt("p.proizvodId"), rs2.getString("p.naziv"), rs2.getDouble("p.cena"));           
+                StavkaRacuna sr = new StavkaRacuna(r, rs2.getInt("sr.rb"), rs2.getInt("sr.kolicina"), p, rs2.getDouble("sr.iznos"));
+                stavke.add(sr);
+            }
+            r.setStavke(stavke);
+            return r;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+        
+    }
+
+    public List<Proizvod> vratiProizvode() {
+        try {
+            String upit  = "select * from proizvod";
+            PreparedStatement ps = conn.getConnection().prepareStatement(upit);
+            ResultSet rs = ps.executeQuery();
+            List<Proizvod> proizvodi = new LinkedList<>();
+            while(rs.next()){
+                Proizvod p = new Proizvod(rs.getInt(1), rs.getString(2), rs.getDouble(3));
+                proizvodi.add(p);
+                        
+            }
+            System.out.println(proizvodi);
+            return proizvodi;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public void sacuvajRacun(Racun racun) {
+        try {
+            String update = "update racun set datum = ?, klijentId = ?, ukupanIznos = ? where racunId = ?";
+            PreparedStatement ps1 = conn.getConnection().prepareStatement(update);
+            ps1.setDate(1, new java.sql.Date(racun.getDatum().getTime()));
+            ps1.setInt(2, racun.getKlijent().getKlijentId());
+            ps1.setDouble(3, racun.getUkupanIznos());
+            ps1.setInt(4, racun.getRacunId());
+            
+            ps1.executeUpdate();
+            String delete = "delete from stavkaRacuna where racunId = ?";
+            PreparedStatement ps2 = conn.getConnection().prepareStatement(delete);
+            ps2.setInt(1, racun.getRacunId());
+            ps2.executeUpdate();
+            
+            String insert = "insert into stavkaRacuna values(?,?,?,?,?) ";
+            PreparedStatement ps3 = conn.getConnection().prepareStatement(insert);
+            
+            for (StavkaRacuna sr : racun.getStavke()) {
+                ps3.setInt(1, racun.getRacunId());
+                ps3.setInt(2, sr.getRb());
+                ps3.setInt(3, sr.getKolicina());
+                ps3.setInt(4, sr.getProizvod().getProizvodId());
+                ps3.setDouble(5, sr.getIznos());
+                ps3.addBatch();
+            }
+            ps3.executeBatch();
+            
+            conn.commit();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+}
+// do ovde je DBBroker
+// SERVER  --------------------------------------------------------------------------------------------------------------------
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Server {
+    ServerSocket serverSocket;
+    
+    public void start(){
+        try {
+            serverSocket = new ServerSocket(9000);
+            
+            System.out.println("Server je pokrenut i ceka klijenta");
+            while(true){
+                Socket socket = serverSocket.accept();
+                System.out.println("Klijent se povezao na server");
+                
+                ClientHandler ch = new ClientHandler(this, socket);
+                ch.start();
+                
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    public static void main(String[] args) {
+        new Server().start();
+    }
+}
+// CLIENT HANDLER -----------------------------------------------------------------------------------------
+import java.net.Socket;
+import java.util.List;
+import transfer.Receiver;
+import transfer.Request;
+import transfer.Response;
+import transfer.Sender;
+
+public class ClientHandler extends Thread{
+    Server server;
+    Socket socket;
+    Sender sender;
+    Receiver receiver;
+
+    public ClientHandler(Server server, Socket socket) {
+        this.server = server;
+        this.socket = socket;
+        this.sender = new Sender(socket);
+        this.receiver = new Receiver(socket);
+    }
+
+    @Override
+    public void run() {
+        System.out.println("CH je ukljucen");
+        while(true){
+            Request req = (Request) receiver.receive();
+            Response res = new  Response();
+            
+            switch (req.getOperation()) {
+                case vratiKlijente -> {
+                    System.out.println("CH je u klijentima");
+                    List<Klijent> klijenti = DBBroker.getInstance().vratiKlijente();
+                    res.setResult(klijenti);
+                }
+                case pronadjiRacun -> {
+                    System.out.println("CH je u pronadjiracun");
+                    int id = (int) req.getArgument();
+                    Racun racun = DBBroker.getInstance().pronadjiRacun(id);
+                    res.setResult(racun);
+                }
+                case vratiProizvode -> {
+                    System.out.println("CH je u proizvodima");
+                    List<Proizvod> proizvodi = DBBroker.getInstance().vratiProizvode();
+                    res.setResult(proizvodi);
+                }
+                case sacuvajRacun -> {
+                    Racun racun = (Racun) req.getArgument();
+                    DBBroker.getInstance().sacuvajRacun(racun);
+                    
+                }
+                
+                default -> throw new AssertionError();
+            }
+            
+            sender.send(res);
+        }
+    }
+}
+// TABLE MODEL -----------------------------------------------------------------------------------------
+import java.util.LinkedList;
+import java.util.List;
+import javax.swing.table.AbstractTableModel;
+
+public class TableModel extends AbstractTableModel{
+    List<StavkaRacuna> stavke ;
+    String[] columnNames={"proizvod", "cena", "kolicina", "iznos"};
+    
+    TableModel(){
+        this.stavke=new LinkedList<>();
+    }
+
+    public List<StavkaRacuna> getStavke() {
+        return stavke;
+        
+    }
+    
+    @Override
+    public int getRowCount() {
+        return stavke.size();
+    }
+public void addRow(StavkaRacuna stavka){
+    stavka.setRb(stavke.size()+1);
+    stavke.add(stavka);
+    
+    fireTableDataChanged();
+}
+public void removeRow(int row){
+    stavke.remove(row);
+    fireTableDataChanged();
+}
+    public void setStavke(List<StavkaRacuna> stavke) {
+        this.stavke = stavke;
+        fireTableDataChanged();
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return columnNames[column];
+    }
+
+    @Override
+    public int getColumnCount() {
+        return columnNames.length;
+                }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        StavkaRacuna sr = stavke.get(rowIndex);
+        switch (columnIndex) {
+            case 0 -> {
+                return sr.getProizvod();
+            }
+            case 1 ->{
+                return sr.getProizvod().getCena();
+            }
+            case 2 -> {
+                return sr.getKolicina();
+            }
+            case 3 -> {
+                return sr.getProizvod().getCena()*sr.getKolicina();
+            }
+            default -> throw new AssertionError();
+        }
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        StavkaRacuna sr = stavke.get(rowIndex);
+        switch (columnIndex) {
+            case 0 -> {
+                sr.setProizvod((Proizvod) aValue);
+                sr.setIznos(sr.getProizvod().getCena()*sr.getKolicina());       
+                fireTableDataChanged();
+            }
+            case 1-> {
+                sr.getProizvod().setCena((double) aValue);
+            }
+            default -> throw new AssertionError();
+        }
+    }
+    
+    
+}
+// CLIENT FORM -----------------------------------------------------------------------------------------
+import controller.CController;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+ 
+// GORE NA POCETKU KLASE NE ZABORAVI DA INICIJALIZUJES TIPA Racun racun, TableModle tm, List<StavkaRacuna> stavke;
+//
+private void jButtonPronadjiActionPerformed(java.awt.event.ActionEvent evt) {                                                
+        int racunId= Integer.parseInt(jTextField1.getText());
+        racun = CController.getInstance().pronadjiRacun(racunId);
+        System.out.println(racun);
+        stavke = racun.getStavke();
+        for (StavkaRacuna stavkaRacuna : stavke) {
+            System.out.println("-------------------------" + stavkaRacuna);
+        }
+        jTextField2.setText(String.valueOf(racun.getDatum()));
+        tm = (TableModel) jTable1.getModel();
+        tm.setStavke(stavke);
+        for (StavkaRacuna sr : tm.getStavke()) {
+            System.out.println("-------------------------" + sr);
+        }
+    }  
+    private void jButtonDodajActionPerformed(java.awt.event.ActionEvent evt) {                                             
+        new DodajDialogForm(this, true, racun, tm).setVisible(true);
+
+    }                                            
+
+    private void jButtonobrisiActionPerformed(java.awt.event.ActionEvent evt) {                                              
+       int row = jTable1.getSelectedRow();
+        tm.removeRow(row);
+    }              
+// SAVE SA VISE STVARI
+    private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {                                         
+        try {
+            tm = (TableModel) jTable1.getModel();
+            double ukIznos = 0;
+            for (StavkaRacuna sr : tm.getStavke()) {
+                ukIznos += sr.getIznos();
+                System.out.println("Iznos ove stavkeRacuna je " + sr.getIznos());
+            }
+            System.out.println(ukIznos);
+            racun.setRacunId(Integer.parseInt(jTextField1.getText()));
+            racun.setUkupanIznos(ukIznos);
+            racun.setStavke(tm.getStavke());
+            racun.setKlijent((Klijent) jComboBox1.getSelectedItem());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+            Date datum = sdf.parse(jTextField2.getText());
+            racun.setDatum(datum);
+            CController.getInstance().sacuvajRacun(racun);
+        } catch (ParseException ex) {
+            Logger.getLogger(ClientForma.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }            
+
+// POCETAK ZA DODAJ FORMU ILI BILO KOJU DIALOG FORM ------------------------------------------------------------------------------------------------
+public class DodajDialogForm extends javax.swing.JDialog {
+Racun racun;
+TableModel tm;
+
+    /**
+     * Creates new form DodajDialogForm
+     */
+    public DodajDialogForm(java.awt.Frame parent, boolean modal, Racun racun, TableModel tm) {
+        super(parent, modal);
+        initComponents();
+        popuniCMB();
+        this.racun=racun;
+        this.tm=tm;
+    }    
