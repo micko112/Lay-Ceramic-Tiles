@@ -1,4 +1,4 @@
-package com.example.layceramictiles.components
+package com.example.layceramictiles.ui.components
 
 object SharedDataHolder {
     var wallTilesArea: Float = 0f

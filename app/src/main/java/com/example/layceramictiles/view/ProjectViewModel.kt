@@ -1,11 +1,14 @@
 package com.example.layceramictiles.view
 
+import android.os.Parcelable
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.layceramictiles.dataBase.ProjectRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.parcelize.Parcelize
 
+
+@Parcelize
 data class ProjectUiState(
     // AREA
     val widthA: String = "",
@@ -19,74 +22,122 @@ data class ProjectUiState(
     val tileFloorLength: String = "",
     val wallGroutWidth: String = "",
     val floorGroutWidth: String = "",
-    //val wallTileArea: String = "",
-    //val floorTileArea: String = "",
+
+    val floorTilesNeeded: Float = 0f,
+    val wallTilesNeeded: Float = 0f,
 
     // Rezultati
     val resultsCalculate: List<String?> = List(6) {null},
     val resultsMaterials: List<String?> = List(2) {null},
     // Naziv fajla za čuvanje/učitavanje
     var currentFileName: String? = null,
+
+    val isAreaInputValid: Boolean = false,
+    val isMaterialsInputValid: Boolean = false,
+
     val saveError: String? = null,
     val loadError: String? = null,
     val showSaveSuccessMessage: Boolean = false
-        )
-class ProjectViewModel: ViewModel() {
+        ) : Parcelable
+
+class ProjectViewModel(private val savedStateHandle: SavedStateHandle): ViewModel() {
 
     private val repository = ProjectRepository()
     // Jedan StateFlow koji drži celo stanje (UiState)
-    private val _uiState = MutableStateFlow(ProjectUiState())
-    val uiState = _uiState.asStateFlow()
+
+       val uiState: StateFlow<ProjectUiState> = savedStateHandle.getStateFlow("uiState",
+        ProjectUiState())
 
     // --- Funkcije koje UI poziva za promenu stanja ---
+    private fun updateState(newState: ProjectUiState) {
+        val isAreaValid = (newState.widthA.toFloatOrNull() ?: 0f) > 0f &&
+                (newState.lengthB.toFloatOrNull() ?: 0f) > 0f &&
+                (newState.heightH.toFloatOrNull() ?: 0f) > 0f
+
+        val areMaterialsValid = (newState.tileWallWidth.toFloatOrNull() ?: 0f) > 0f &&
+                (newState.tileWallLength.toFloatOrNull() ?: 0f) > 0f &&
+                (newState.wallGroutWidth.toFloatOrNull() ?: 0f) > 0f &&
+                (newState.tileFloorWidth.toFloatOrNull() ?: 0f) > 0f &&
+                (newState.tileFloorLength.toFloatOrNull() ?: 0f) > 0f &&
+                (newState.floorGroutWidth.toFloatOrNull() ?: 0f) > 0f
+
+        savedStateHandle["uiState"] = newState.copy(
+            isAreaInputValid = isAreaValid,
+            isMaterialsInputValid = areMaterialsValid
+        )
+    }
+
+    // --- SVE `on...Change` FUNKCIJE SADA IZGLEDAJU OVAKO ---
+
     fun onWidthAChange(newValue: String) {
-        _uiState.update { it.copy(widthA = newValue) }
+        updateState(uiState.value.copy(widthA = newValue))
     }
     fun onLengthBChange(newValue: String) {
-        _uiState.update { it.copy(lengthB = newValue) }
+        updateState(uiState.value.copy(lengthB = newValue))
     }
     fun onHeightHChange(newValue: String) {
-        _uiState.update { it.copy(heightH = newValue) }
+        updateState(uiState.value.copy(heightH = newValue))
     }
-    fun onTileWallWidthChange(newValue: String) = _uiState.update { it.copy(tileWallWidth = newValue) }
-    fun onTileWallLengthChange(newValue: String) = _uiState.update { it.copy(tileWallLength = newValue) }
-    fun onTileFloorWidthChange(newValue: String) = _uiState.update { it.copy(tileFloorWidth = newValue) }
-    fun onTileFloorLengthChange(newValue: String) = _uiState.update { it.copy(tileFloorLength = newValue) }
-    fun onWallGroutWidthChange(newValue: String) = _uiState.update { it.copy(wallGroutWidth = newValue) }
-    fun onFloorGroutWidthChange(newValue: String) = _uiState.update { it.copy(floorGroutWidth = newValue) }
-    //fun onWallTileAreaChange(newValue: String) = _uiState.update { it.copy(wallGroutWidth = newValue) }
-    //fun onFloorTileAreaChange(newValue: String) = _uiState.update { it.copy(floorGroutWidth = newValue) }
+    fun onTileWallWidthChange(newValue: String) {
+        updateState(uiState.value.copy(tileWallWidth = newValue))
+    }
+    fun onTileWallLengthChange(newValue: String) {
+        updateState(uiState.value.copy(tileWallLength = newValue))
+    }
+    fun onTileFloorWidthChange(newValue: String) {
+        updateState(uiState.value.copy(tileFloorWidth = newValue))
+    }
+    fun onTileFloorLengthChange(newValue: String) {
+        updateState(uiState.value.copy(tileFloorLength = newValue))
+    }
+    fun onWallGroutWidthChange(newValue: String) {
+        updateState(uiState.value.copy(wallGroutWidth = newValue))
+    }
+    fun onFloorGroutWidthChange(newValue: String) {
+        updateState(uiState.value.copy(floorGroutWidth = newValue))
+    }
+
     fun calculateArea() {
-        val widthA = _uiState.value.widthA.toFloatOrNull() ?: 0f
-        val lengthB = _uiState.value.lengthB.toFloatOrNull() ?: 0f
-        val heightH = _uiState.value.heightH.toFloatOrNull() ?: 0f
+        val currentState = uiState.value
+        val widthA = currentState.widthA.toFloatOrNull() ?: 0f
+        val lengthB = currentState.lengthB.toFloatOrNull() ?: 0f
+        val heightH = currentState.heightH.toFloatOrNull() ?: 0f
 
         val floorArea = widthA * lengthB
         val wallArea = 2 * (widthA + lengthB) * heightH
-        val floorTiles = floorArea * 1.1f // 10% waste
-        val wallTiles = wallArea * 1.08f // 8% waste
+        val floorTiles = floorArea * 1.1f
+        val wallTiles = wallArea * 1.08f
         val totalTiles = floorTiles + wallTiles
+
         val newResults = listOf(
-            "%.1fm²".format(floorArea + wallArea),
-            "%.1fm²".format(floorArea),
-            "%.1fm²".format(wallArea),
-            "%.1fm²".format(totalTiles),
-            "%.1fm²".format(floorTiles),
-            "%.1fm²".format(wallTiles)
+            String.format("%.1f m²", floorArea + wallArea),
+            String.format("%.1f m²", floorArea),
+            String.format("%.1f m²", wallArea),
+            String.format("%.1f m²", totalTiles),
+            String.format("%.1f m²", floorTiles),
+            String.format("%.1f m²", wallTiles)
         )
-        _uiState.update { it.copy(resultsCalculate = newResults) }
+
+        // Pripremimo novo stanje i prosledimo ga centralnoj funkciji
+        val newState = currentState.copy(
+            resultsCalculate = newResults,
+            floorTilesNeeded = floorTiles,
+            wallTilesNeeded = wallTiles
+        )
+        updateState(newState) // <-- PROMENA
     }
     fun calculateMaterials() {
+        val currentState = uiState.value
         // Uzimamo vrednosti direktno iz stanja (state)
-        val floorTileArea = _uiState.value.resultsCalculate.getOrNull(4)?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
-        val wallTileArea = _uiState.value.resultsCalculate.getOrNull(5)?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
+        val floorTileArea = currentState.floorTilesNeeded
+        val wallTileArea = currentState.wallTilesNeeded
 
-        val tileFloorWidth = _uiState.value.tileFloorWidth.toFloatOrNull() ?: 0f
-        val tileFloorLength = _uiState.value.tileFloorLength.toFloatOrNull() ?: 0f
-        val tileWallWidth = _uiState.value.tileWallWidth.toFloatOrNull() ?: 0f
-        val tileWallLength = _uiState.value.tileWallLength.toFloatOrNull() ?: 0f
-        val floorGroutWidth = _uiState.value.floorGroutWidth.toFloatOrNull() ?: 0f
-        val wallGroutWidth = _uiState.value.wallGroutWidth.toFloatOrNull() ?: 0f
+        val tileFloorWidth = currentState.tileFloorWidth.toFloatOrNull() ?: 0f
+        val tileFloorLength = currentState.tileFloorLength.toFloatOrNull() ?: 0f
+        val tileWallWidth = currentState.tileWallWidth.toFloatOrNull() ?: 0f
+        val tileWallLength = currentState.tileWallLength.toFloatOrNull() ?: 0f
+        val floorGroutWidth = currentState.floorGroutWidth.toFloatOrNull() ?: 0f
+        val wallGroutWidth = currentState.wallGroutWidth.toFloatOrNull() ?: 0f
 
         val adhesiveKg = (floorTileArea * 6.0 + wallTileArea * 5).toFloat()
         val wallTileGirth = 0.8f
@@ -101,14 +152,15 @@ class ProjectViewModel: ViewModel() {
             "%.1f kg".format(adhesiveKg),
             "%.1f kg".format(totalGrout)
         )
-        _uiState.update { it.copy(resultsMaterials = newResults) }
+        val newState = currentState.copy(resultsMaterials = newResults)
+        updateState(newState)
     }
     fun saveProject(fileName: String) {
-        repository.saveProject(fileName, _uiState.value) { result ->
+        repository.saveProject(fileName, uiState.value) { result ->
             result.onSuccess {
-                _uiState.update { it.copy(showSaveSuccessMessage = true) }
-            }.onFailure {error ->
-                _uiState.update { it.copy(saveError = error.message) }
+                savedStateHandle["uiState"] = uiState.value.copy(showSaveSuccessMessage = true)
+            }.onFailure { error ->
+                savedStateHandle["uiState"] = uiState.value.copy(saveError = error.message)
             }
         }
 
@@ -116,14 +168,20 @@ class ProjectViewModel: ViewModel() {
     fun loadProject(fileName: String, onDone: () -> Unit) {
         repository.loadProject(fileName) { result ->
             result.onSuccess { loadedState ->
-                _uiState.value = loadedState
+                // Kada učitamo projekat, upišemo ga u savedStateHandle
+                savedStateHandle["uiState"] = loadedState
                 onDone()
-            }.onFailure { error -> _uiState.update { it.copy(loadError = error.message) } }
+            }.onFailure { error ->
+                savedStateHandle["uiState"] = uiState.value.copy(loadError = error.message)
+            }
         }
     }
 
     fun resetState() {
-        _uiState.value = ProjectUiState()
+        savedStateHandle["uiState"] = ProjectUiState()
+    }
+    fun onSaveMessageShown() {
+        savedStateHandle["uiState"] = uiState.value.copy(showSaveSuccessMessage = false)
     }
     }
 

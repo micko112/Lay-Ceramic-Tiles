@@ -1,6 +1,6 @@
 package com.example.layceramictiles.dataBase
 
-import com.example.layceramictiles.CalculationData
+import com.example.layceramictiles.ui.screens.CalculationData
 import com.example.layceramictiles.view.ProjectUiState
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -46,6 +46,10 @@ class ProjectRepository {
                         tileFloorLength = doc.getString("tileFloorLength") ?: "",
                         wallGroutWidth = doc.getString("wallGroutWidth") ?: "",
                         floorGroutWidth = doc.getString("floorGroutWidth") ?: "",
+
+                        floorTilesNeeded = (doc.getDouble("floorTileArea") ?: 0.0).toFloat(),
+                        wallTilesNeeded = (doc.getDouble("wallTileArea") ?: 0.0).toFloat(),
+
                         resultsMaterials = listOf(
                             doc.getString("adhesive"),
                             doc.getString("grout")
@@ -72,6 +76,10 @@ class ProjectRepository {
             "tileFloorLength" to projectState.tileFloorLength,
             "wallGroutWidth" to projectState.wallGroutWidth,
             "floorGroutWidth" to projectState.floorGroutWidth,
+
+            "floorTileArea" to projectState.floorTilesNeeded,
+            "wallTileArea" to projectState.wallTilesNeeded,
+
             "adhesive" to projectState.resultsMaterials.getOrNull(0),
             "grout" to projectState.resultsMaterials.getOrNull(1)
         )

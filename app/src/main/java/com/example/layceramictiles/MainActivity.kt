@@ -9,9 +9,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.layceramictiles.navigation.Screen
+import com.example.layceramictiles.ui.screens.Screen1
+import com.example.layceramictiles.ui.screens.ScreenCalculate
+import com.example.layceramictiles.ui.screens.ScreenMaterials
+import com.example.layceramictiles.ui.theme.LayCeramicTilesTheme
 import com.example.layceramictiles.view.ProjectViewModel
 import com.example.layceramictiles.view.Screen1ViewModel
-import com.example.layceramictiles.ui.theme.LayCeramicTilesTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,37 +41,40 @@ fun MyAppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "Screen1"
+        startDestination = Screen.Screen1.route
     ) {
 
-        composable("Screen1") {
+        composable(Screen.Screen1.route) {
             Screen1(
                 viewModel = screen1ViewModel,
                 onContinueClick = {
                     projectViewModel.resetState()
-                    navController.navigate("ScreenCalculate")
+                    navController.navigate(Screen.ScreenCalculate.route)
                 },
                 onOpenSaved = { fileName ->
                     projectViewModel.loadProject(fileName) {
-                        navController.navigate("ScreenCalculate")
+                        navController.navigate(Screen.ScreenCalculate.route)
                     }
                 }
             )
         }
-        composable("ScreenCalculate") {
+        composable(Screen.ScreenCalculate.route) {
             ScreenCalculate(
                 viewModel = projectViewModel,
+                onPreviousClick = {
+                    navController.popBackStack()
+                },
                 onNextClick = {
-                    navController.navigate("ScreenMaterials")
+                    navController.navigate(Screen.ScreenMaterials.route)
                 }
-                )
+            )
         }
-        composable("ScreenMaterials") {
+        composable(Screen.ScreenMaterials.route) {
 
             ScreenMaterials(
                 viewModel = projectViewModel,
                 onPreviousClick = {
-                    navController.navigate("ScreenCalculate")
+                    navController.popBackStack()
                 },
                 onSaveClick = { fileNameFromDialog ->
                     projectViewModel.saveProject(fileNameFromDialog)
@@ -75,18 +82,5 @@ fun MyAppNavigation() {
                 }
             )
         }
-
-
-//var showScreen1 by rememberSaveable { mutableStateOf(true) }
-//    Surface {
-//        if(showScreen1){
-//            Screen1(onContinueClick = {showScreen1=false})
-//        }
-//        else {
-//            ScreenCalculate()
-//        }
-//    }
-//}
-
     }
 }

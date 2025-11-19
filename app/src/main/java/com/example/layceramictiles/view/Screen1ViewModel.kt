@@ -1,7 +1,7 @@
 package com.example.layceramictiles.view
 
 import androidx.lifecycle.ViewModel
-import com.example.layceramictiles.CalculationData
+import com.example.layceramictiles.ui.screens.CalculationData
 import com.example.layceramictiles.dataBase.ProjectRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow

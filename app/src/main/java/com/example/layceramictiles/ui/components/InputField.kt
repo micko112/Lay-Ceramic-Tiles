@@ -1,4 +1,4 @@
-package com.example.layceramictiles.components
+package com.example.layceramictiles.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.IntrinsicSize

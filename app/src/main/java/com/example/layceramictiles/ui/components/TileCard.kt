@@ -1,4 +1,4 @@
-package com.example.layceramictiles.components
+package com.example.layceramictiles.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border

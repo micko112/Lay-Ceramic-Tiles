@@ -1,5 +1,6 @@
-package com.example.layceramictiles
+package com.example.layceramictiles.ui.screens
 
+import android.os.Parcelable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,13 +44,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.layceramictiles.R
+import com.example.layceramictiles.ui.components.CustomButton
 import com.example.layceramictiles.view.Screen1ViewModel
-import com.example.layceramictiles.components.CustomButton
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class CalculationData(
     val id: String,
     val fileName: String
-)
+) : Parcelable
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
