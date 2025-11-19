@@ -1,7 +1,7 @@
 
 import android.util.Log
-import com.example.layceramictiles.View.ScreenCalculateViewModel
-import com.example.layceramictiles.View.ScreenMaterialsViewModel
+import com.example.layceramictiles.view.ScreenCalculateViewModel
+import com.example.layceramictiles.view.ScreenMaterialsViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions

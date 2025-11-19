@@ -27,43 +27,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.layceramictiles.View.ScreenCalculateViewModel
-import com.example.layceramictiles.View.ScreenMaterialsViewModel
+import com.example.layceramictiles.view.ProjectViewModel
 import com.example.layceramictiles.components.CustomButton
 import com.example.layceramictiles.components.NextPreviousSaveButtons
 import com.example.layceramictiles.components.TileCard
 
 @Composable
 fun ScreenMaterials(
-
-    viewModel: ScreenMaterialsViewModel = viewModel(),
-    viewModelCalc: ScreenCalculateViewModel,
+    viewModel: ProjectViewModel = viewModel(),
     onPreviousClick: () -> Unit = {},
     onSaveClick: (String) -> Unit = {}
-
 ) {
-//    var TilewallWidth by remember { mutableStateOf("") }
-//    var TilewallLength by remember { mutableStateOf("") }
-//    var TilefloorWidth by remember { mutableStateOf("") }
-//    var TilefloorLength by remember { mutableStateOf("") }
-//    var WallGroutWidth by remember { mutableStateOf("") }
-//    var FloorGroutWidth by remember { mutableStateOf("") }
-    val tileWallWidth by viewModel.tileWallWidth.collectAsState()
-    val tileWallLength by viewModel.tileWallLength.collectAsState()
-    val tileFloorWidth by viewModel.tileFloorWidth.collectAsState()
-    val tileFloorLength by viewModel.tileFloorLength.collectAsState()
-    val wallGroutWidth by viewModel.wallGroutWidth.collectAsState()
-    val floorGroutWidth by viewModel.floorGroutWidth.collectAsState()
-    val results by viewModel.results.collectAsState()
-
-    val calculateViewModel = viewModelCalc
-    val materialsViewModel = viewModel
+    val uiState by viewModel.uiState.collectAsState()
 
     var showDialog by remember { mutableStateOf(false) }
-    var fileName by remember { mutableStateOf("") }
-    // 🔢 Izračunaj materijale
-    //var results by remember { mutableStateOf<List<String?>>(List(2) { null }) }
-
+    var fileName by remember { mutableStateOf(uiState.currentFileName ?: "") }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(40.dp))
@@ -71,12 +49,12 @@ fun ScreenMaterials(
         TileCard(
             title = "WALL TILE",
             imageRes = R.drawable.tile,
-            valueWidth = tileWallWidth,
-            valueHeight = tileWallLength,
-            valueGrout = wallGroutWidth,
-            onWidthChange = { viewModel.tileWallWidth.value = it },
-            onHeightChange = { viewModel.tileWallLength.value = it },
-            onGroutChange = { viewModel.wallGroutWidth.value = it }
+            valueWidth = uiState.tileWallWidth,
+            valueLength = uiState.tileWallLength,
+            valueGrout = uiState.wallGroutWidth,
+            onWidthChange = { viewModel.onTileWallWidthChange(it)},
+            onLengthChange = { viewModel.onTileWallLengthChange(it) },
+            onGroutChange = { viewModel.onWallGroutWidthChange(it) }
             ,
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -84,12 +62,12 @@ fun ScreenMaterials(
         TileCard(
             title = "FLOOR TILE",
             imageRes = R.drawable.tile,
-            valueWidth = tileFloorWidth,
-            valueHeight = tileFloorLength,
-            valueGrout = floorGroutWidth,
-            onWidthChange = { viewModel.tileFloorWidth.value = it },
-            onHeightChange = { viewModel.tileFloorLength.value = it },
-            onGroutChange = { viewModel.floorGroutWidth.value = it }
+            valueWidth = uiState.tileFloorWidth,
+            valueLength = uiState.tileFloorLength,
+            valueGrout = uiState.floorGroutWidth,
+            onWidthChange = { viewModel.onTileFloorWidthChange(it) },
+            onLengthChange = { viewModel.onTileFloorLengthChange(it) },
+            onGroutChange = { viewModel.onFloorGroutWidthChange(it) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -99,34 +77,7 @@ fun ScreenMaterials(
             CustomButton(
                 text = "CALCULATE",
                 onClick = {
-                    // Pročitaj površine iz viewModela
-                    val floorTileArea = calculateViewModel.results.value.getOrNull(4)
-                        ?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
-                    val wallTileArea = calculateViewModel.results.value.getOrNull(5)
-                        ?.replace("m²", "")?.trim()?.toFloatOrNull() ?: 0f
-
-                    materialsViewModel.floorTileArea.value = floorTileArea
-                    materialsViewModel.wallTileArea.value = wallTileArea
-                    // Ostali ulazi iz viewModela
-                    val tileFloorWidth = materialsViewModel.tileFloorWidth.value.toFloatOrNull() ?: 0f
-                    val tileFloorLength = materialsViewModel.tileFloorLength.value.toFloatOrNull() ?: 0f
-                    val tileWallWidth = materialsViewModel.tileWallWidth.value.toFloatOrNull() ?: 0f
-                    val tileWallLength = materialsViewModel.tileWallLength.value.toFloatOrNull() ?: 0f
-                    val floorGroutWidth = materialsViewModel.floorGroutWidth.value.toFloatOrNull() ?: 0f
-                    val wallGroutWidth = materialsViewModel.wallGroutWidth.value.toFloatOrNull() ?: 0f
-
-                    // Računaj i upiši u results.value
-                    val resultList = calculateAdhesiveAndGrout(
-                        floorTileArea = floorTileArea,
-                        wallTileArea = wallTileArea,
-                        floorTileWidthCm = tileFloorWidth,
-                        floorTileLengthCm = tileFloorLength,
-                        wallTileWidthCm = tileWallWidth,
-                        wallTileLengthCm = tileWallLength,
-                        floorGroutWidthMm = floorGroutWidth,
-                        wallGroutWidthMm = wallGroutWidth
-                    )
-                    materialsViewModel.results.value = resultList
+                    viewModel.calculateMaterials()
                 }
             )
         }
@@ -166,8 +117,8 @@ fun ScreenMaterials(
                             .height(50.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        ResultColumn(label = "Adhesive", value = results[0])
-                        ResultColumn(label = "Grout", value = results[1])
+                        ResultColumn(label = "Adhesive", value = uiState.resultsMaterials[0])
+                        ResultColumn(label = "Grout", value = uiState.resultsMaterials[1])
                     }
                 }
                 Spacer(modifier = Modifier.height(14.dp))

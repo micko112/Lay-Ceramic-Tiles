@@ -31,27 +31,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.layceramictiles.View.ScreenCalculateViewModel
-import com.example.layceramictiles.View.ScreenMaterialsViewModel
+import com.example.layceramictiles.view.Screen1ViewModel
 import com.example.layceramictiles.components.CustomButton
-import com.example.layceramictiles.components.SharedDataHolder
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
 
 data class CalculationData(
     val id: String,
@@ -62,36 +55,14 @@ data class CalculationData(
 @Composable
 fun Screen1(
     onContinueClick: () -> Unit,
-    viewModelCalc: ScreenCalculateViewModel,
-    viewModelMat: ScreenMaterialsViewModel,
+    viewModel: Screen1ViewModel,
     onOpenSaved: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val ctx = LocalContext.current
-    val db = Firebase.firestore
-
-    var files by remember { mutableStateOf<List<CalculationData>>(emptyList()) }
-    var loading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        db.collection("Full Baza")
-            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .limit(20)
-            .get()
-            .addOnSuccessListener { snap ->
-                files = snap.documents.map {
-                    CalculationData(
-                        id = it.id,
-                        fileName = it.id
-                    )
-                }
-                loading = false
-            }
-            .addOnFailureListener { e ->
-                error = e.message
-                loading = false
-            }
+        viewModel.loadSavedFiles()
     }
 
     Column(
@@ -128,9 +99,9 @@ fun Screen1(
         )
         Spacer(modifier=Modifier.height(20.dp))
 
-        if (loading) {
+        if (uiState.loading) {
             Text("Loading saves...")
-        } else if (error != null) {
+        } else if (uiState.error != null) {
             // Zaobljena pozadina za error poruku
             Box(
                 modifier = Modifier
@@ -142,12 +113,12 @@ fun Screen1(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Error: $error",
+                    text = "Error: $uiState.error",
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     textAlign = TextAlign.Center
                 )
             }
-        } else if (files.isNotEmpty()) {
+        } else if (uiState.files.isNotEmpty()) {
             Surface(
                 tonalElevation = 4.dp,
                 shape = RoundedCornerShape(24.dp), // Povećan radius zaobljenja
@@ -157,21 +128,14 @@ fun Screen1(
                     .padding(horizontal = 8.dp)
             ) {
                 SavedFilesList(
-                    files = files,
+                    files = uiState.files,
                     onOpen = { file ->
-                        loadProjectIntoViewModels(
-                            fileName = file.fileName,
-                            viewModelCalc = viewModelCalc,
-                            viewModelMat = viewModelMat,
-                            onDone = {
-                                SharedDataHolder.currentFileName = file.fileName
-                                onOpenSaved(file.fileName)
-                            }
-                        )
+                        // Samo obaveštavamo navigaciju koji fajl treba otvoriti
+                        onOpenSaved(file.fileName)
                     },
-                    onDeletedLocally = { file ->
-                        // Remove from local list after successful deletion
-                        files = files.filter { it.id != file.id }
+                    onDelete = { file ->
+                        // Pozivamo funkciju za brisanje iz ViewModela
+                        viewModel.deleteProject(file)
                     }
                 )
             }
@@ -179,7 +143,6 @@ fun Screen1(
         }
 
         CustomButton("CALCULATE", onClick = {
-            SharedDataHolder.currentFileName = null // novi projekat
             onContinueClick()
         })
     }
@@ -190,7 +153,7 @@ fun Screen1(
 fun SavedFilesList(
     files: List<CalculationData>,
     onOpen: (CalculationData) -> Unit,
-    onDeletedLocally: (CalculationData) -> Unit,
+    onDelete: (CalculationData) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -200,18 +163,11 @@ fun SavedFilesList(
     ) {
         items(files, key = { it.id }) { file ->
             val dismissState = rememberDismissState(
-                confirmStateChange = { value ->
-                    if (value == DismissValue.DismissedToStart) {
-                        // Delete from Firestore and notify parent
-                        deleteProjectFromFirestore(
-                            collection = "Full Baza",
-                            docId = file.id,
-                            onDone = { success ->
-                                if (success) onDeletedLocally(file)
-                            }
-                        )
+                confirmStateChange = {
+                    if(it == DismissValue.DismissedToStart){
+                        onDelete(file)
                         true
-                    } else {
+                    }else {
                         false
                     }
                 }
@@ -277,56 +233,3 @@ fun SavedFilesList(
     }
 }
 
-private fun deleteProjectFromFirestore(
-    collection: String,
-    docId: String,
-    onDone: (Boolean) -> Unit
-) {
-    val db = Firebase.firestore
-    db.collection(collection)
-        .document(docId)
-        .delete()
-        .addOnSuccessListener { onDone(true) }
-        .addOnFailureListener { onDone(false) }
-}
-
-fun loadProjectIntoViewModels(
-    fileName: String,
-    viewModelCalc: ScreenCalculateViewModel,
-    viewModelMat: ScreenMaterialsViewModel,
-    onDone: () -> Unit
-) {
-    val db = Firebase.firestore
-    db.collection("Full Baza").document(fileName).get()
-        .addOnSuccessListener { doc ->
-            // Calculate input
-            viewModelCalc.widthA.value  = doc.getString("widthA") ?: ""
-            viewModelCalc.lengthB.value = doc.getString("lengthB") ?: ""
-            viewModelCalc.heightH.value = doc.getString("heightH") ?: ""
-
-            // Calculate results
-            val rCalc = doc.get("resultsCalculate") as? List<*> ?: emptyList<String>()
-            viewModelCalc.results.value = rCalc.map { it?.toString() } // List<String?>
-
-            // Materials input
-            viewModelMat.tileWallWidth.value   = doc.getString("tileWallWidth") ?: ""
-            viewModelMat.tileWallLength.value  = doc.getString("tileWallLength") ?: ""
-            viewModelMat.tileFloorWidth.value  = doc.getString("tileFloorWidth") ?: ""
-            viewModelMat.tileFloorLength.value = doc.getString("tileFloorLength") ?: ""
-            viewModelMat.wallGroutWidth.value  = doc.getString("wallGroutWidth") ?: ""
-            viewModelMat.floorGroutWidth.value = doc.getString("floorGroutWidth") ?: ""
-
-            // Materials results
-            viewModelMat.wallTileArea.value  = (doc.getDouble("wallTileArea") ?: 0.0).toFloat()
-            viewModelMat.floorTileArea.value = (doc.getDouble("floorTileArea") ?: 0.0).toFloat()
-            val adhesive = doc.getString("adhesive")
-            val grout    = doc.getString("grout")
-            viewModelMat.results.value = listOf(adhesive, grout)
-
-            // Extra: upiši u SharedDataHolder za materijale (ako koristiš tamo)
-            SharedDataHolder.floorTilesArea = viewModelMat.floorTileArea.value
-            SharedDataHolder.wallTilesArea  = viewModelMat.wallTileArea.value
-
-            onDone()
-        }
-}

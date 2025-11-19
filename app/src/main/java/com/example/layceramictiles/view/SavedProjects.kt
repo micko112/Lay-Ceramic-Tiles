@@ -1,4 +1,4 @@
-package com.example.layceramictiles.View
+package com.example.layceramictiles.view
 
 data class SavedProject(
     val name: String,

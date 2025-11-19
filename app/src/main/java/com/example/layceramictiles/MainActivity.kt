@@ -5,48 +5,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.layceramictiles.View.ScreenCalculateViewModel
-import com.example.layceramictiles.View.ScreenMaterialsViewModel
-import com.example.layceramictiles.components.SharedDataHolder
+import com.example.layceramictiles.view.ProjectViewModel
+import com.example.layceramictiles.view.Screen1ViewModel
 import com.example.layceramictiles.ui.theme.LayCeramicTilesTheme
-import saveProjectToFirestore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Referenca na Firestore
-//        val db = Firebase.firestore
-//
-//        // Primer upisa u Firestore
-//        val testData = hashMapOf(
-//            "ime" to "Proba",
-//            "vreme" to System.currentTimeMillis()
-//        )
-//
-//        db.collection("testKolekcija")
-//            .add(testData)
-//            .addOnSuccessListener { documentReference ->
-//                println("Uspešno dodato: ${documentReference.id}")
-//            }
-//            .addOnFailureListener { e ->
-//                println("Greška pri dodavanju: $e")
-//            }
+
         enableEdgeToEdge()
         setContent {
             LayCeramicTilesTheme {
 
-                myAppNavigation()
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                }
+                MyAppNavigation()
             }
         }
     }
@@ -54,56 +29,53 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun myAppNavigation(){
+fun MyAppNavigation() {
 
-    val viewModelMat: ScreenMaterialsViewModel = viewModel()
-    val viewModelCalc: ScreenCalculateViewModel = viewModel()
+    val projectViewModel: ProjectViewModel = viewModel()
+    val screen1ViewModel: Screen1ViewModel = viewModel()
     val navController = rememberNavController()
 
-    NavHost(navController=navController,
-        startDestination = "Screen1"){
-        composable ("Screen1"){
+    NavHost(
+        navController = navController,
+        startDestination = "Screen1"
+    ) {
+
+        composable("Screen1") {
             Screen1(
-                onContinueClick = { navController.navigate("ScreenCalculate") },
-                viewModelCalc = viewModelCalc,
-                viewModelMat  = viewModelMat,
-                onOpenSaved = { /* file opened */ navController.navigate("ScreenCalculate") }
+                viewModel = screen1ViewModel,
+                onContinueClick = {
+                    projectViewModel.resetState()
+                    navController.navigate("ScreenCalculate")
+                },
+                onOpenSaved = { fileName ->
+                    projectViewModel.loadProject(fileName) {
+                        navController.navigate("ScreenCalculate")
+                    }
+                }
             )
         }
         composable("ScreenCalculate") {
             ScreenCalculate(
-                viewModel = viewModelCalc,
+                viewModel = projectViewModel,
                 onNextClick = {
                     navController.navigate("ScreenMaterials")
-                },
-
-            )
+                }
+                )
         }
         composable("ScreenMaterials") {
 
             ScreenMaterials(
-//                wallTileArea = SharedDataHolder.wallTilesArea,
-//                floorTileArea = SharedDataHolder.floorTilesArea,
-                viewModel = viewModelMat,
-                viewModelCalc = viewModelCalc,
+                viewModel = projectViewModel,
                 onPreviousClick = {
                     navController.navigate("ScreenCalculate")
                 },
                 onSaveClick = { fileNameFromDialog ->
-                    val name = SharedDataHolder.currentFileName ?: fileNameFromDialog
-                    SharedDataHolder.currentFileName = name
-                    saveProjectToFirestore(
-                        fileName = name,
-                        viewModelCalc = viewModelCalc,
-                        viewModelMat = viewModelMat,
-                        wallTileArea = SharedDataHolder.wallTilesArea,
-                        floorTileArea = SharedDataHolder.floorTilesArea
-                    )
-                }
+                    projectViewModel.saveProject(fileNameFromDialog)
 
+                }
             )
         }
-    }
+
 
 //var showScreen1 by rememberSaveable { mutableStateOf(true) }
 //    Surface {
@@ -114,10 +86,7 @@ fun myAppNavigation(){
 //            ScreenCalculate()
 //        }
 //    }
-}
+//}
 
-@Preview
-@Composable
-private fun view() {
-    ScreenCalculate()
+    }
 }

@@ -41,9 +41,9 @@ import com.example.layceramictiles.R
 //        title = "WALL TILE",
 //        imageRes = R.drawable.tile,
 //        valueWidth = "20",
-//        valueHeight = "20",
+//        valueLength = "20",
 //        onWidthChange = { wallWidth = it },
-//        onHeightChange = { wallWidth = it }
+//        onLengthChange = { wallWidth = it }
 //    )
 //}
 @Composable
@@ -51,10 +51,10 @@ fun TileCard(
     title: String,
     imageRes: Int,
     valueWidth: String,
-    valueHeight: String,
+    valueLength: String,
     valueGrout: String,
     onWidthChange: (String) -> Unit,
-    onHeightChange: (String) -> Unit,
+    onLengthChange: (String) -> Unit,
     onGroutChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -109,10 +109,10 @@ fun TileCard(
                         contentAlignment = Alignment.BottomEnd
                     ) {
                         InputField(
-                            value = valueHeight,
+                            value = valueLength,
                             prefix = "length =",
                             unit = "cm",
-                            onValueChange = onHeightChange,
+                            onValueChange = onLengthChange,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
 
@@ -180,9 +180,9 @@ fun Card(
     title: String,
     imageRes: Int,
     valueWidth: String,
-    valueHeight: String,
+    valueLength: String,
     onWidthChange: (String) -> Unit,
-    onHeightChange: (String) -> Unit
+    onLengthChange: (String) -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -232,8 +232,8 @@ fun Card(
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Height (cm)", fontSize = 14.sp)
                     TextField(
-                        value = valueHeight,
-                        onValueChange = onHeightChange,
+                        value = valueLength,
+                        onValueChange = onLengthChange,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                         colors = TextFieldDefaults.colors(

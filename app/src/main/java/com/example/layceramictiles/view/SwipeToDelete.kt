@@ -1,5 +1,5 @@
 @file:OptIn(ExperimentalMaterialApi::class)
-package com.example.layceramictiles.View
+package com.example.layceramictiles.view
 
 
 import androidx.compose.foundation.background
@@ -29,15 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.layceramictiles.CalculationData
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
 
-data class CalculationData(
-    val id: String,
-    val fileName: String
 
-)
 @Composable
 fun SavedFilesList(
     files: List<CalculationData>,

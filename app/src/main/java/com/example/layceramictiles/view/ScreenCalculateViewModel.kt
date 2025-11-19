@@ -1,4 +1,4 @@
-package com.example.layceramictiles.View
+package com.example.layceramictiles.view
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
