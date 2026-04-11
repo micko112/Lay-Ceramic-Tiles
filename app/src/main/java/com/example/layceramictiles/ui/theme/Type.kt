@@ -9,24 +9,49 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.layceramictiles.R
 
 // Set of Material typography styles to start with
 //val horizon = FontFamily(
 //    Font(R.font.horizon) // R.font.<ime_fonta_bez_ekstenzije>
 //)
+val HorizonFontFamily = FontFamily(
+    Font(R.font.horizon, FontWeight.Normal)
+)
 val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+    displayLarge = TextStyle(
+        fontFamily = HorizonFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 20.sp,
+        fontSize = 57.sp,
+        lineHeight = 64.sp,
+        letterSpacing = (-0.25).sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = HorizonFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
+        letterSpacing = 0.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = HorizonFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = FontFamily.Default, // Podrazumevani sistemski font
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
-    )
+    ),
 
-    /* Other default text styles to override
-    titleLarge = TextStyle(
+
+    displayMedium = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp
@@ -38,5 +63,5 @@ val Typography = Typography(
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
     )
-    */
+
 )

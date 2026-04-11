@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -75,7 +75,7 @@ fun ScreenCalculate(
                     CustomButton(
                         text = "CALCULATE",
                         onClick = { viewModel.calculateArea() },
-                        //enabled = uiState.isAreaInputValid
+                        enabled = uiState.isAreaInputValid
                     )
                 }
 
@@ -158,15 +158,19 @@ fun ScreenCalculate(
 }
 
 @Composable
-fun ResultColumn(label: String, value: String?) {
-    Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+fun RowScope.ResultColumn(label: String, value: String?) {
+    Column(
+        modifier = Modifier
+            .weight(1f)
+            .padding(horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.width(120.dp)
+            style = MaterialTheme.typography.bodyLarge
         )
         Text(
-            text = value ?: "",
+            text = value ?: "—",
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
         )
     }

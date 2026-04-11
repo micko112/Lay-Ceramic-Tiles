@@ -2,18 +2,34 @@ package com.example.layceramictiles.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xA1074B7E)
-val Pink80 = Color(0xFFEFB8C8)
+// ============================================================
+// JEDINI FAJL ZA BOJE - menjaj samo ovde, sve se propagira
+// ============================================================
 
-val Purple40 = Color(0xFF00E523)
-val PurpleGrey40 = Color(0xFF882F64)
-val Pink40 = Color(0xFF7D5260)
+// -- Primarna paleta (glavna boja aplikacije) --
+val PrimaryBlue = Color(0xFF195AE0)
+val PrimaryBlueLight = Color(0xFF356CE5)
+val PrimaryBlueLighter = Color(0xFF6492EF)
 
-val PrimaryBlue = Color(0xFF0D47A1) // Tamno plava
-val SecondaryOrange = Color(0xFFFF6F00) // Narandžasta
-val TertiaryGreen = Color(0xFF2E7D32) // Tamno zelena
+// -- Akcenti --
+val AccentOrange = Color(0xFFFF8C00)     // za highlight, badge, itd.
+val AccentGreen = Color(0xFF2E7D32)      // za success poruke
 
-val LightGray = Color(0xFFF5F5F5) // Svetlo siva pozadina
-val DarkText = Color(0xFF1B1B1B) // Tamna boja teksta
-val WhiteText = Color(0xFFFFFFFF) // Bela boja teksta
+// -- Pozadina i povrsine --
+val BackgroundLight = Color(0xFFF5F5F5)  // svetlo siva pozadina
+val SurfaceWhite = Color(0xFFFFFFFF)     // kartice i povrsine
+val SurfaceDark = Color(0xFF1B1B1B)      // dark mode pozadina
+val SurfaceDarkElevated = Color(0xFF2C2C2C) // dark mode kartice
+
+// -- Tekst --
+val TextDark = Color(0xFF1B1B1B)         // tamni tekst
+val TextWhite = Color(0xFFFFFFFF)        // beli tekst
+val TextGray = Color(0xFF757575)         // sekundarni/hint tekst
+
+// -- Ivice i razdvajaci --
+val BorderLight = Color(0xFFE0E0E0)      // ivice kartica
+val InputBackground = Color(0xFFEEEEEE)  // pozadina input polja
+
+// -- Greska --
+val ErrorRed = Color(0xFFD32F2F)
+val OnErrorWhite = Color(0xFFFFFFFF)

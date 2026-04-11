@@ -31,15 +31,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -65,32 +66,35 @@ fun Screen1(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.loadSavedFiles()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewModel.loadSavedFiles()
+        }
     }
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+            .fillMaxSize(),
+            //.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         // Naslov - svaka reč u posebnom redu
         Text(
             text = "LAY",
-            fontSize = 60.sp,
-            fontWeight = FontWeight.ExtraBold
+            fontSize = 47.sp,
+            style = MaterialTheme.typography.displayLarge,
         )
         Text(
             text = "CERAMIC",
-            fontSize = 60.sp,
-            fontWeight = FontWeight.ExtraBold
+            fontSize = 47.sp,
+            style = MaterialTheme.typography.displayLarge,
         )
         Text(
             text = "TILES",
-            fontSize = 60.sp,
-            fontWeight = FontWeight.ExtraBold
+            fontSize = 48.sp,
+            style = MaterialTheme.typography.displayLarge,
         )
 
         // Logo
@@ -100,6 +104,7 @@ fun Screen1(
             modifier = Modifier
                 .height(80.dp)
                 .fillMaxWidth()
+                .padding(horizontal = 24.dp)
         )
         Spacer(modifier=Modifier.height(20.dp))
 
@@ -110,19 +115,23 @@ fun Screen1(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.errorContainer)
-                    .padding(16.dp),
+                    .padding(horizontal = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Error: $uiState.error",
+                    text = "Error: ${uiState.error}",
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     textAlign = TextAlign.Center
                 )
             }
-        } else if (uiState.files.isNotEmpty()) {
+        } else if (uiState.files.isEmpty()) {
+            Text(
+                text = "No saved projects",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+        } else {
             Surface(
                 tonalElevation = 4.dp,
                 shape = RoundedCornerShape(24.dp), // Povećan radius zaobljenja
@@ -197,12 +206,12 @@ fun SavedFilesList(
                             Icon(
                                 Icons.Default.Delete,
                                 contentDescription = "Delete",
-                                tint = Color.White // Bijela ikonica
+                                tint = MaterialTheme.colorScheme.onError
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 "Delete",
-                                color = Color.White // Bijeli tekst
+                                color = MaterialTheme.colorScheme.onError
                             )
                         }
                     }

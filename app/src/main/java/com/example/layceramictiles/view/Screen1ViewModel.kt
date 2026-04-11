@@ -3,7 +3,6 @@ package com.example.layceramictiles.view
 import androidx.lifecycle.ViewModel
 import com.example.layceramictiles.ui.screens.CalculationData
 import com.example.layceramictiles.dataBase.ProjectRepository
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,7 +13,6 @@ data class Screen1UiState (
     val error: String? = null
 )
 class Screen1ViewModel : ViewModel() {
-    private val db = FirebaseFirestore.getInstance()
     private val repository = ProjectRepository()
     private val _uiState = MutableStateFlow(Screen1UiState())
     val uiState = _uiState.asStateFlow()

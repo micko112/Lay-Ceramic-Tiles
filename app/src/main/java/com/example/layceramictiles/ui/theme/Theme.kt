@@ -1,67 +1,51 @@
 package com.example.layceramictiles.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = PrimaryBlueLight,
+    onPrimary = TextWhite,
+    secondary = PrimaryBlueLighter,
+    onSecondary = TextWhite,
+    tertiary = AccentOrange,
+    onTertiary = TextWhite,
+    background = SurfaceDark,
+    onBackground = TextWhite,
+    surface = SurfaceDarkElevated,
+    onSurface = TextWhite,
+    error = ErrorRed,
+    onError = OnErrorWhite
 )
 
 private val LightColorScheme = lightColorScheme(
-//    primary = Purple40,
-//    secondary = PurpleGrey40,
-//    tertiary = Pink40
-    primary = PrimaryBlue, // Glavna boja za dugmad i važne elemente
-    onPrimary = WhiteText, // Boja teksta na primarnoj boji
-
-    secondary = SecondaryOrange, // Sekundarna, akcentna boja
-    onSecondary = WhiteText,
-
-    tertiary = TertiaryGreen,
-    onTertiary = WhiteText,
-
-    background = LightGray, // Boja pozadine ekrana
-    onBackground = DarkText, // Boja teksta na pozadini
-
-    surface = Color.White, // Boja "površina" kao što su kartice
-    onSurface = DarkText, // Boja teksta na tim površinama
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = PrimaryBlue,
+    onPrimary = TextWhite,
+    secondary = PrimaryBlueLight,
+    onSecondary = TextWhite,
+    tertiary = PrimaryBlueLighter,
+    onTertiary = TextWhite,
+    background = BackgroundLight,
+    onBackground = TextDark,
+    surface = SurfaceWhite,
+    onSurface = TextDark,
+    surfaceVariant = InputBackground,
+    onSurfaceVariant = TextGray,
+    outline = BorderLight,
+    error = ErrorRed,
+    onError = OnErrorWhite
 )
 
 @Composable
 fun LayCeramicTilesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

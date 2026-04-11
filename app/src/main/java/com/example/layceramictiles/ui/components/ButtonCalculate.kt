@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,14 +18,15 @@ fun CustomButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     widthFraction: Float = 0.8f,
     height: Dp = 64.dp,
-    fontSize: Int = 30,
     buttonColor: Color = MaterialTheme.colorScheme.primary,
-    textColor: Color = Color.White
+    textColor: Color = MaterialTheme.colorScheme.onPrimary
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = buttonColor,
             contentColor = textColor
@@ -37,8 +37,8 @@ fun CustomButton(
     ) {
         Text(
             text = text,
-            fontSize = fontSize.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineLarge,
+            fontSize = 26.sp
         )
     }
 }

@@ -21,10 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.layceramictiles.R
 
 @Composable
@@ -41,34 +40,35 @@ fun AreaCard(
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
-            .border(1.dp, Color.LightGray, RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color.Black,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Box(
                 modifier = Modifier
-                    .height(48.dp) // ista visina kao slika
+                    .height(48.dp)
                     .fillMaxWidth()
-                    .padding( horizontal = 16.dp)
-                    .padding(bottom = 10.dp), // širina h inputa
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 10.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically,) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "ENTER DIMENSIONS",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.Gray,
+                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.displayMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier,
                     )
                     Image(
@@ -76,21 +76,17 @@ fun AreaCard(
                         contentDescription = "dimensions"
                     )
                 }
-
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top, // bitno!
+                verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Center
             ) {
-                // Box iste visine kao slika
                 Column {
-
-
                     Box(
                         modifier = Modifier
-                            .height(80.dp) // ista visina kao slika
-                            .width(180.dp), // širina h inputa
+                            .height(80.dp)
+                            .width(180.dp),
                         contentAlignment = Alignment.BottomEnd
                     ) {
                         InputField(
@@ -100,15 +96,13 @@ fun AreaCard(
                             onValueChange = onLengthChange,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-
                         )
                     }
 
-
                     Box(
                         modifier = Modifier
-                            .height(50.dp) // ista visina kao slika
-                            .width(180.dp), // širina h inputa
+                            .height(50.dp)
+                            .width(180.dp),
                         contentAlignment = Alignment.BottomStart
                     ) {
                         InputField(
@@ -118,18 +112,12 @@ fun AreaCard(
                             onValueChange = onHeightChange,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-
                         )
                     }
-
                 }
-
-
-
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // w= iznad slike
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -150,7 +138,6 @@ fun AreaCard(
                         contentDescription = "WC Image",
                         modifier = Modifier
                             .size(130.dp)
-
                     )
                 }
             }

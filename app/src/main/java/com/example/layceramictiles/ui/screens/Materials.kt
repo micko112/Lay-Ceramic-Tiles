@@ -110,7 +110,7 @@ fun ScreenMaterials(
                     CustomButton(
                         text = "CALCULATE",
                         onClick = { viewModel.calculateMaterials() },
-                        //enabled = uiState.isMaterialsInputValid
+                        enabled = uiState.isMaterialsInputValid
                     )
                 }
 

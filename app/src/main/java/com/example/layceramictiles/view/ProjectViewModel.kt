@@ -30,7 +30,7 @@ data class ProjectUiState(
     val resultsCalculate: List<String?> = List(6) {null},
     val resultsMaterials: List<String?> = List(2) {null},
     // Naziv fajla za čuvanje/učitavanje
-    var currentFileName: String? = null,
+    val currentFileName: String? = null,
 
     val isAreaInputValid: Boolean = false,
     val isMaterialsInputValid: Boolean = false,
@@ -105,8 +105,8 @@ class ProjectViewModel(private val savedStateHandle: SavedStateHandle): ViewMode
 
         val floorArea = widthA * lengthB
         val wallArea = 2 * (widthA + lengthB) * heightH
-        val floorTiles = floorArea * 1.1f
-        val wallTiles = wallArea * 1.08f
+        val floorTiles = floorArea * 1.1f   // +10% waste margin for floor tiles
+        val wallTiles = wallArea * 1.08f    // +8% waste margin for wall tiles
         val totalTiles = floorTiles + wallTiles
 
         val newResults = listOf(
@@ -139,13 +139,19 @@ class ProjectViewModel(private val savedStateHandle: SavedStateHandle): ViewMode
         val floorGroutWidth = currentState.floorGroutWidth.toFloatOrNull() ?: 0f
         val wallGroutWidth = currentState.wallGroutWidth.toFloatOrNull() ?: 0f
 
-        val adhesiveKg = (floorTileArea * 6.0 + wallTileArea * 5).toFloat()
-        val wallTileGirth = 0.8f
-        val floorTileGirth = 1f
+        val adhesiveKg = (floorTileArea * 6.0 + wallTileArea * 5).toFloat() // ~6 kg/m² floor, ~5 kg/m² wall
+        val wallTileGirth = 0.8f  // grout depth factor for wall tiles
+        val floorTileGirth = 1f   // grout depth factor for floor tiles
 
-        val floorGrout = floorTileArea * ((tileFloorLength + tileFloorWidth) * floorGroutWidth / 10 * floorTileGirth * 1.6f) / (tileFloorLength * tileFloorWidth)
-        val wallGrout = wallTileArea * ((tileWallLength + tileWallWidth) * wallGroutWidth / 10 * wallTileGirth * 1.6f) / (tileWallLength * tileWallWidth)
-        val totalGrout = if (floorGrout.isNaN() || wallGrout.isNaN()) 0f else floorGrout + wallGrout
+        // Formula: area * (perimeter * groutWidth / 10 * depthFactor * 1.6 density) / tileArea
+        // 1.6 = grout density (kg/dm³), /10 converts mm to cm
+        val floorGrout = if (tileFloorLength > 0f && tileFloorWidth > 0f)
+            floorTileArea * ((tileFloorLength + tileFloorWidth) * floorGroutWidth / 10 * floorTileGirth * 1.6f) / (tileFloorLength * tileFloorWidth)
+        else 0f
+        val wallGrout = if (tileWallLength > 0f && tileWallWidth > 0f)
+            wallTileArea * ((tileWallLength + tileWallWidth) * wallGroutWidth / 10 * wallTileGirth * 1.6f) / (tileWallLength * tileWallWidth)
+        else 0f
+        val totalGrout = floorGrout + wallGrout
 
 
         val newResults = listOf(
@@ -168,8 +174,8 @@ class ProjectViewModel(private val savedStateHandle: SavedStateHandle): ViewMode
     fun loadProject(fileName: String, onDone: () -> Unit) {
         repository.loadProject(fileName) { result ->
             result.onSuccess { loadedState ->
-                // Kada učitamo projekat, upišemo ga u savedStateHandle
-                savedStateHandle["uiState"] = loadedState
+                // Prolazimo kroz updateState da bi isAreaInputValid/isMaterialsInputValid bili ispravno izračunati
+                updateState(loadedState)
                 onDone()
             }.onFailure { error ->
                 savedStateHandle["uiState"] = uiState.value.copy(loadError = error.message)

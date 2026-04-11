@@ -12,10 +12,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -34,6 +34,9 @@ fun InputField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val textColor = MaterialTheme.colorScheme.onSurface
+    val bgColor = MaterialTheme.colorScheme.surfaceVariant
+
     BasicTextField(
         value = value,
         onValueChange = { newValue ->
@@ -43,10 +46,10 @@ fun InputField(
         },
         visualTransformation = PrefixUnitTransformation(prefix, unit),
         textStyle = TextStyle(
-            color = Color.Black,
+            color = textColor,
             textAlign = TextAlign.Center,
         ),
-        cursorBrush = SolidColor(Color.Black),
+        cursorBrush = SolidColor(textColor),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = modifier
             .width(IntrinsicSize.Max)
@@ -54,10 +57,9 @@ fun InputField(
             .widthIn(max = 170.dp)
             .height(30.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(Color.LightGray)
+            .background(bgColor)
             .padding(horizontal = 8.dp)
             .padding(vertical = 8.dp)
-
             .fillMaxWidth()
             .fillMaxHeight()
     )
