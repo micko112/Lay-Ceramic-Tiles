@@ -9,8 +9,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.layceramictiles" />
-                  <option name="mobileSdkAppId" value="1:540671164762:android:b603e286df9f556df4f363" />
+                  <option name="appId" value="appinventor.ai_krasstomas.Install_Ceramic_Tile" />
+                  <option name="mobileSdkAppId" value="1:540671164762:android:6bf965e437198e12f4f363" />
                   <option name="projectId" value="layceramictiles" />
                   <option name="projectNumber" value="540671164762" />
                 </ConnectionSetting>

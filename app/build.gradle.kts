@@ -12,18 +12,28 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.layceramictiles"
+        applicationId = "appinventor.ai_krasstomas.Install_Ceramic_Tile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 22
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("android.keystore")
+            storePassword = "android"
+            keyAlias = "androidkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -65,8 +75,7 @@ dependencies {
 
     implementation ("androidx.compose.material:material:1.4.3")
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
-
+    implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
     // When using the BoM, you don't specify versions in Firebase library dependencies
 
     // Add the dependency for the Firebase SDK for Google Analytics

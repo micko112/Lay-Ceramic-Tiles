@@ -17,6 +17,9 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = TextWhite,
     surface = SurfaceDarkElevated,
     onSurface = TextWhite,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = TextGrayLight,
+    outline = BorderDark,
     error = ErrorRed,
     onError = OnErrorWhite
 )

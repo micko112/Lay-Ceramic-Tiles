@@ -1,6 +1,5 @@
 package com.example.layceramictiles.ui.screens
 
-// SVI POTREBNI IMPORTI SU OVDE
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,35 +20,54 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.layceramictiles.R
 import com.example.layceramictiles.ui.components.AreaCard
 import com.example.layceramictiles.ui.components.CustomButton
+import com.example.layceramictiles.ui.components.CustomWallsDialog
 import com.example.layceramictiles.ui.components.NextPreviousSaveButtons
+import com.example.layceramictiles.ui.components.SettingsButton
+import com.example.layceramictiles.ui.theme.ThemeMode
 import com.example.layceramictiles.view.ProjectViewModel
 
 @Composable
 fun ScreenCalculate(
     viewModel: ProjectViewModel,
     onNextClick: () -> Unit,
-    onPreviousClick: () -> Unit
+    onPreviousClick: () -> Unit,
+    currentThemeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val resultsReady = uiState.resultsCalculate.all { !it.isNullOrBlank() }
+    var showCustomWallsDialog by remember { mutableStateOf(false) }
 
-    // KORISTIMO SCAFFOLD KAO OSNOVU, KAO I NA DRUGOM EKRANU
+    // Custom Walls Dialog
+    if (showCustomWallsDialog) {
+        CustomWallsDialog(
+            walls = uiState.customWalls,
+            onAddWall = { viewModel.addCustomWall() },
+            onRemoveWall = { viewModel.removeCustomWall(it) },
+            onWallWidthChange = { i, v -> viewModel.onCustomWallWidthChange(i, v) },
+            onWallHeightChange = { i, v -> viewModel.onCustomWallHeightChange(i, v) },
+            onClearAll = { viewModel.clearCustomWalls() },
+            onDismiss = { showCustomWallsDialog = false }
+        )
+    }
+
     Scaffold { innerPadding ->
-        // Glavni Column koji drži sve
+        Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // <-- PRIMENJUJEMO PADDING IZ SCAFFOLD-A
         ) {
-            // 1. Deo koji se skroluje i zauzima sav preostali prostor
+            // Scrollable content
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -59,17 +77,23 @@ fun ScreenCalculate(
 
                 AreaCard(
                     title = "AREA",
-                    imageRes = R.drawable.wc,
-                    valueWidth = uiState.widthA,
-                    valueLength = uiState.lengthB,
+                    valueSideA = uiState.sideA,
+                    valueSideB = uiState.sideB,
+                    valueSideC = uiState.sideC,
+                    valueSideD = uiState.sideD,
                     valueHeight = uiState.heightH,
-                    onWidthChange = { viewModel.onWidthAChange(it) },
-                    onLengthChange = { viewModel.onLengthBChange(it) },
+                    useCustomWalls = uiState.useCustomWalls,
+                    customWallCount = uiState.customWalls.size,
+                    onSideAChange = { viewModel.onSideAChange(it) },
+                    onSideBChange = { viewModel.onSideBChange(it) },
+                    onSideCChange = { viewModel.onSideCChange(it) },
+                    onSideDChange = { viewModel.onSideDChange(it) },
                     onHeightChange = { viewModel.onHeightHChange(it) },
+                    onCustomWallsClick = { showCustomWallsDialog = true },
                     modifier = Modifier
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     CustomButton(
@@ -79,34 +103,32 @@ fun ScreenCalculate(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 16.dp),
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.secondary,
                     tonalElevation = 8.dp,
                     shadowElevation = 4.dp
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = 6.dp)) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
                         Text(
                             "AREA:", style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
                         )
+                        Spacer(modifier = Modifier.height(6.dp))
                         Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.tertiary,
-                            tonalElevation = 8.dp,
-                            shadowElevation = 4.dp
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.tertiary
                         ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 10.dp),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 ResultColumn(label = "Total", value = uiState.resultsCalculate.getOrNull(0))
@@ -114,38 +136,39 @@ fun ScreenCalculate(
                                 ResultColumn(label = "Wall", value = uiState.resultsCalculate.getOrNull(2))
                             }
                         }
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             "TILES NEEDED:", style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
                         )
+                        Spacer(modifier = Modifier.height(6.dp))
                         Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.tertiary,
-                            shadowElevation = 4.dp
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.tertiary
                         ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth().height(50.dp),
-                                horizontalArrangement = Arrangement.Absolute.SpaceEvenly
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 10.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 ResultColumn(label = "Total", value = uiState.resultsCalculate.getOrNull(3))
                                 ResultColumn(label = "Floor", value = uiState.resultsCalculate.getOrNull(4))
                                 ResultColumn(label = "Wall", value = uiState.resultsCalculate.getOrNull(5))
                             }
                         }
-                        Spacer(modifier = Modifier.height(14.dp))
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 2. Deo sa dugmadima koji je uvek na dnu
+            // Bottom buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
+                    .padding(bottom = innerPadding.calculateBottomPadding())
             ) {
                 NextPreviousSaveButtons(
                     onPreviousClick = onPreviousClick,
@@ -153,6 +176,12 @@ fun ScreenCalculate(
                     isNextEnabled = resultsReady
                 )
             }
+        }
+            SettingsButton(
+                currentThemeMode = currentThemeMode,
+                onThemeModeChange = onThemeModeChange,
+                modifier = Modifier.align(Alignment.TopEnd)
+            )
         }
     }
 }
@@ -170,7 +199,7 @@ fun RowScope.ResultColumn(label: String, value: String?) {
             style = MaterialTheme.typography.bodyLarge
         )
         Text(
-            text = value ?: "—",
+            text = value ?: "\u2014",
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
         )
     }

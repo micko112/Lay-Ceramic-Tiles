@@ -2,17 +2,14 @@ package com.example.layceramictiles.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ============================================================
-// JEDINI FAJL ZA BOJE - menjaj samo ovde, sve se propagira
-// ============================================================
 
 // -- Primarna paleta (glavna boja aplikacije) --
-val PrimaryBlue = Color(0xFF195AE0)
-val PrimaryBlueLight = Color(0xFF356CE5)
-val PrimaryBlueLighter = Color(0xFF6492EF)
+val PrimaryBlue = Color(0xFF0054FF)
+val PrimaryBlueLight = Color(0xFF205EFF)
+val PrimaryBlueLighter = Color(0xFF5087FF)
 
 // -- Akcenti --
-val AccentOrange = Color(0xFFFF8C00)     // za highlight, badge, itd.
+val AccentOrange = Color(0xDD81A6F8)     // za highlight, badge, itd.
 val AccentGreen = Color(0xFF2E7D32)      // za success poruke
 
 // -- Pozadina i povrsine --
@@ -29,6 +26,11 @@ val TextGray = Color(0xFF757575)         // sekundarni/hint tekst
 // -- Ivice i razdvajaci --
 val BorderLight = Color(0xFFE0E0E0)      // ivice kartica
 val InputBackground = Color(0xFFEEEEEE)  // pozadina input polja
+
+// -- Dark mode varijante --
+val SurfaceVariantDark = Color(0xFF3A3A3A)  // pozadina input polja (dark)
+val TextGrayLight = Color(0xFFB0B0B0)       // sekundarni tekst (dark)
+val BorderDark = Color(0xFF444444)           // ivice (dark)
 
 // -- Greska --
 val ErrorRed = Color(0xFFD32F2F)

@@ -36,7 +36,9 @@ import androidx.compose.ui.unit.dp
 import com.example.layceramictiles.R
 import com.example.layceramictiles.ui.components.CustomButton
 import com.example.layceramictiles.ui.components.NextPreviousSaveButtons
+import com.example.layceramictiles.ui.components.SettingsButton
 import com.example.layceramictiles.ui.components.TileCard
+import com.example.layceramictiles.ui.theme.ThemeMode
 import com.example.layceramictiles.view.ProjectViewModel
 import kotlinx.coroutines.launch
 
@@ -44,7 +46,9 @@ import kotlinx.coroutines.launch
 fun ScreenMaterials(
     viewModel: ProjectViewModel,
     onPreviousClick: () -> Unit,
-    onSaveClick: (String) -> Unit
+    onSaveClick: (String) -> Unit,
+    currentThemeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -66,20 +70,20 @@ fun ScreenMaterials(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
 
+        Box(modifier = Modifier.fillMaxSize()) {
         // Glavni Column koji drži sve
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
         ) {
 
             // 1. Deo koji se skroluje i zauzima sav preostali prostor
             Column(
                 modifier = Modifier
-                    .weight(1f) // <-- KLJUČNA PROMENA
-                    .verticalScroll(rememberScrollState()) // <-- DODAJEMO SKROL
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(80.dp))
 
                 TileCard(
                     title = "WALL TILE",
@@ -125,34 +129,29 @@ fun ScreenMaterials(
                     tonalElevation = 8.dp,
                     shadowElevation = 4.dp
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = 6.dp)) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
                         Text(
                             "MATERIALS NEEDED",
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center
                         )
+                        Spacer(modifier = Modifier.height(6.dp))
                         Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.tertiary,
-                            tonalElevation = 8.dp,
-                            shadowElevation = 4.dp
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.tertiary
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(50.dp),
+                                    .padding(vertical = 10.dp),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 ResultColumn(label = "Adhesive", value = uiState.resultsMaterials.getOrNull(0))
                                 ResultColumn(label = "Grout", value = uiState.resultsMaterials.getOrNull(1))
                             }
                         }
-                        Spacer(modifier = Modifier.height(14.dp))
                     }
                 }
             }
@@ -162,6 +161,7 @@ fun ScreenMaterials(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
+                    .padding(bottom = innerPadding.calculateBottomPadding())
             ) {
                 NextPreviousSaveButtons(
                     onPreviousClick = onPreviousClick,
@@ -174,6 +174,12 @@ fun ScreenMaterials(
                     }
                 )
             }
+        }
+            SettingsButton(
+                currentThemeMode = currentThemeMode,
+                onThemeModeChange = onThemeModeChange,
+                modifier = Modifier.align(Alignment.TopEnd)
+            )
         }
 
         // Dialog za čuvanje je ostao van glavnog Column-a da bi se prikazao preko svega

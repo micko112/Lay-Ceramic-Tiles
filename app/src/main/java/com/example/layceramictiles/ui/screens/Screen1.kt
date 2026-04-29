@@ -3,6 +3,7 @@ package com.example.layceramictiles.ui.screens
 import android.os.Parcelable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -47,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.layceramictiles.R
 import com.example.layceramictiles.ui.components.CustomButton
+import com.example.layceramictiles.ui.components.SettingsButton
+import com.example.layceramictiles.ui.theme.ThemeMode
 import com.example.layceramictiles.view.Screen1ViewModel
 import kotlinx.parcelize.Parcelize
 
@@ -62,6 +66,8 @@ fun Screen1(
     onContinueClick: () -> Unit,
     viewModel: Screen1ViewModel,
     onOpenSaved: (String) -> Unit,
+    currentThemeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -73,10 +79,10 @@ fun Screen1(
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
-            //.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -158,6 +164,13 @@ fun Screen1(
         CustomButton("CALCULATE", onClick = {
             onContinueClick()
         })
+    }
+
+        SettingsButton(
+            currentThemeMode = currentThemeMode,
+            onThemeModeChange = onThemeModeChange,
+            modifier = Modifier.align(Alignment.TopEnd)
+        )
     }
 }
 
