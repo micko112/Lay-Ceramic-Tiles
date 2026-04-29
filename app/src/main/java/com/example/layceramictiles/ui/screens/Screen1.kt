@@ -27,12 +27,16 @@ import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberDismissState
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -53,6 +57,16 @@ import com.example.layceramictiles.ui.components.SettingsButton
 import com.example.layceramictiles.ui.theme.ThemeMode
 import com.example.layceramictiles.view.Screen1ViewModel
 import kotlinx.parcelize.Parcelize
+
+private object LightBlueRippleTheme : RippleTheme {
+    @Composable override fun defaultColor() = Color(0xFF64B5F6)
+    @Composable override fun rippleAlpha() = RippleAlpha(
+        pressedAlpha = 0.30f,
+        focusedAlpha = 0.24f,
+        draggedAlpha = 0.16f,
+        hoveredAlpha = 0.08f
+    )
+}
 
 @Parcelize
 data class CalculationData(
@@ -230,17 +244,14 @@ fun SavedFilesList(
                     }
                 },
                 dismissContent = {
-                    // Card button that opens the file when clicked
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(16.dp) // Zaobljene ivice za item
-                    ) {
-                        TextButton(
+                    CompositionLocalProvider(LocalRippleTheme provides LightBlueRippleTheme) {
+                        Card(
                             onClick = { onOpen(file) },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(16.dp)
                         ) {
                             Text(
                                 text = file.fileName,
@@ -249,7 +260,7 @@ fun SavedFilesList(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 12.dp),
-                                textAlign = TextAlign.Center // Centriran tekst
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
